@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { type ReactNode } from "react";
 
 interface ProvidersProps {
@@ -15,7 +16,9 @@ export function Providers({ children }: ProvidersProps) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <TooltipProvider>
+        {children}
+      </TooltipProvider>
     </ThemeProvider>
   );
 }
