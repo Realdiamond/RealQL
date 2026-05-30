@@ -49,7 +49,8 @@ export type RuleValue =
   | number
   | boolean
   | string[]
-  | [string | number, string | number]
+  | [string, string]
+  | [number, number]
   | null;
 
 export interface ValidationError {

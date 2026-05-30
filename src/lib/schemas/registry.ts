@@ -12,7 +12,9 @@ import { ordersSchema, ordersData } from "./orders.schema";
 
 export const SCHEMAS: DataSchema[] = [usersSchema, productsSchema, ordersSchema];
 
-export const SCHEMA_DATA: Record<string, Record<string, unknown>[]> = {
+export type SchemaId = "users" | "products" | "orders";
+
+export const SCHEMA_DATA: Record<SchemaId, Record<string, unknown>[]> = {
   users: usersData,
   products: productsData,
   orders: ordersData,
@@ -21,14 +23,14 @@ export const SCHEMA_DATA: Record<string, Record<string, unknown>[]> = {
 /**
  * Look up a schema by its ID.
  */
-export function getSchema(schemaId: string): DataSchema | undefined {
+export function getSchema(schemaId: SchemaId): DataSchema | undefined {
   return SCHEMAS.find((s) => s.id === schemaId);
 }
 
 /**
  * Get mock dataset for a schema.
  */
-export function getSchemaData(schemaId: string): Record<string, unknown>[] {
+export function getSchemaData(schemaId: SchemaId): Record<string, unknown>[] {
   return SCHEMA_DATA[schemaId] ?? [];
 }
 
@@ -36,5 +38,8 @@ export function getSchemaData(schemaId: string): Record<string, unknown>[] {
  * Get the default schema (first registered).
  */
 export function getDefaultSchema(): DataSchema {
+  if (SCHEMAS.length === 0) {
+    throw new Error("No schemas registered in the registry.");
+  }
   return SCHEMAS[0];
 }

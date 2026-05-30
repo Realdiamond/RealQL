@@ -81,17 +81,6 @@ const countries = [
 const statuses = ["active", "inactive", "suspended", "pending"] as const;
 const roles = ["admin", "editor", "viewer", "moderator"] as const;
 
-function randomEl<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function randomDate(start: Date, end: Date): string {
-  const d = new Date(
-    start.getTime() + Math.random() * (end.getTime() - start.getTime())
-  );
-  return d.toISOString().split("T")[0];
-}
-
 // Seed-based pseudo-random for reproducible data
 function seededRandom(seed: number) {
   let s = seed;
