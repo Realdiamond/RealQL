@@ -190,6 +190,29 @@ describe("queryStore — setSchema", () => {
     expect(getState().activeSchemaId).toBe("products");
     expect(getState().rootGroup.children).toHaveLength(0);
   });
+
+  it("restores activeSchemaId and rootGroup on undo/redo", () => {
+    getState().addRule("root");
+    getState().setSchema("products");
+
+    expect(getState().activeSchemaId).toBe("products");
+    expect(getState().rootGroup.children).toHaveLength(0);
+
+    getState().undo();
+
+    expect(getState().activeSchemaId).toBe("users");
+    expect(getState().rootGroup.children).toHaveLength(1);
+
+    getState().redo();
+
+    expect(getState().activeSchemaId).toBe("products");
+    expect(getState().rootGroup.children).toHaveLength(0);
+  });
+
+  it("does nothing when setting the same schema", () => {
+    getState().setSchema("users"); // already "users"
+    expect(getState().undoStack).toHaveLength(0); // no history pushed
+  });
 });
 
 describe("queryStore — resetQuery", () => {

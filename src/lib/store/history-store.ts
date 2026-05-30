@@ -103,20 +103,39 @@ export const useHistoryStore = create<HistoryState>()(
           const parsed = JSON.parse(json);
           if (!Array.isArray(parsed)) return false;
 
-          // Basic validation: each item should have id, name, query
-          const valid = parsed.every(
-            (item: unknown) =>
-              typeof item === "object" &&
-              item !== null &&
-              "id" in item &&
-              "name" in item &&
-              "query" in item
-          );
+          // Strict validation: check presence and types without using 'any'
+          const valid = parsed.every((item: unknown) => {
+            if (typeof item !== "object" || item === null) return false;
+            const obj = item as Record<string, unknown>;
+            return (
+              typeof obj.id === "string" &&
+              typeof obj.name === "string" &&
+              typeof obj.description === "string" &&
+              typeof obj.schemaId === "string" &&
+              typeof obj.query === "object" &&
+              obj.query !== null &&
+              (typeof obj.createdAt === "number" ||
+                (typeof obj.createdAt === "string" &&
+                  !isNaN(new Date(obj.createdAt).getTime())))
+            );
+          });
 
           if (!valid) return false;
 
+          // Normalize createdAt
+          const normalized = parsed.map((item: unknown) => {
+            const obj = item as Record<string, unknown>;
+            return {
+              ...obj,
+              createdAt:
+                typeof obj.createdAt === "number"
+                  ? obj.createdAt
+                  : new Date(obj.createdAt as string).getTime(),
+            };
+          }) as QueryPreset[];
+
           set((state) => ({
-            presets: [...(parsed as QueryPreset[]), ...state.presets],
+            presets: [...normalized, ...state.presets],
           }));
 
           return true;

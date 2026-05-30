@@ -85,6 +85,18 @@
   --transition-normal: 200ms ease;
   --transition-slow: 300ms ease;
 
+  /* --- Primary action --- */
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+
+  /* --- Combinator tokens (used by CombinatorToggle) --- */
+  --combinator-and-bg: #eef2ff;
+  --combinator-and-text: #4338ca;
+  --combinator-and-border: #c7d2fe;
+  --combinator-or-bg: #fffbeb;
+  --combinator-or-text: #b45309;
+  --combinator-or-border: #fde68a;
+
   color-scheme: light;
 }
 

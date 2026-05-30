@@ -156,6 +156,26 @@ export function insertNode(
 }
 
 /**
+ * Get the depth of a specific node by ID relative to the given root.
+ * Returns -1 if not found.
+ */
+export function getNodeDepth(
+  root: QueryGroup,
+  nodeId: string,
+  currentDepth = 0
+): number {
+  if (root.id === nodeId) return currentDepth;
+  for (const child of root.children) {
+    if (child.id === nodeId) return currentDepth + 1;
+    if (isGroup(child)) {
+      const depth = getNodeDepth(child, nodeId, currentDepth + 1);
+      if (depth !== -1) return depth;
+    }
+  }
+  return -1;
+}
+
+/**
  * Move a node from one position to another within the tree.
  * Used by drag-and-drop reordering.
  */
@@ -165,9 +185,23 @@ export function moveNode(
   targetParentId: string,
   targetIndex: number
 ): QueryGroup {
+  // Cannot move root
+  if (root.id === nodeId) return root;
+
   // Find the node first
   const node = findNode(root, nodeId);
   if (!node) return root;
+
+  // Find and validate target parent
+  const targetParent = findNode(root, targetParentId);
+  if (!targetParent || !isGroup(targetParent)) return root;
+
+  // Prevent moving a group into itself or its descendants
+  if (isGroup(node)) {
+    if (node.id === targetParentId || !!findNode(node, targetParentId)) {
+      return root;
+    }
+  }
 
   // Remove from current position
   const withoutNode = removeNode(root, nodeId);
