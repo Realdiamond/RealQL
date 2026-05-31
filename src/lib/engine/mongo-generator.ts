@@ -14,7 +14,14 @@ import type { QueryGroup, QueryRule, OperatorType } from "@/lib/types";
  */
 export function generateMongoDB(root: QueryGroup): string {
   const filter = generateMongoFilter(root);
-  return JSON.stringify(filter, null, 2);
+  return JSON.stringify(
+    filter,
+    (key, value) => {
+      if (value instanceof RegExp) return `__REGEX_START__/${value.source}/${value.flags}__REGEX_END__`;
+      return value;
+    },
+    2
+  ).replace(/"__REGEX_START__\/(.*?)\/([a-z]*)__REGEX_END__"/g, "/$1/$2");
 }
 
 /**
@@ -51,7 +58,7 @@ export function generateMongoFilter(
   }
 
   // Simplify: if only one condition, unwrap the $and/$or
-  if (conditions.length === 1 && !group.negated) {
+  if (conditions.length === 1) {
     return conditions[0];
   }
 
@@ -97,7 +104,7 @@ function formatMongoCondition(
       return { [field]: { $regex: escapeRegex(String(value)), $options: "i" } };
 
     case "not_contains":
-      return { [field]: { $not: { $regex: escapeRegex(String(value)), $options: "i" } } };
+      return { [field]: { $not: new RegExp(escapeRegex(String(value)), "i") } };
 
     case "starts_with":
       return { [field]: { $regex: `^${escapeRegex(String(value))}`, $options: "i" } };

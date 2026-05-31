@@ -30,19 +30,20 @@ export function ArrayValueInput({
   const datalistId = useId();
 
   const addValues = (raw: string) => {
-    let newItems = raw
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0 && !value.includes(s));
+    const tokens = raw.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+    let newItems = tokens.filter((s) => !value.includes(s));
+    let invalidItems: string[] = [];
 
     if (enumValues) {
+      invalidItems = newItems.filter((s) => !enumValues.includes(s));
       newItems = newItems.filter((s) => enumValues.includes(s));
     }
 
     if (newItems.length > 0) {
       onChange([...value, ...newItems]);
     }
-    setInputValue("");
+    
+    setInputValue(invalidItems.join(", "));
   };
 
   const removeItem = (item: string) => {

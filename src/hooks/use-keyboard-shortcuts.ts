@@ -56,29 +56,33 @@ export function useKeyboardShortcuts() {
           useUIStore.getState().cyclePreviewFormat();
           break;
 
-        case "d":
+        case "d": {
           e.preventDefault();
           const currentTheme = theme === "system" ? systemTheme : theme;
           setTheme(currentTheme === "dark" ? "light" : "dark");
           break;
+        }
 
-        case "/":
+        case "/": {
           e.preventDefault();
           const uiStore = useUIStore.getState();
           uiStore.setShortcutsDialogOpen(!uiStore.shortcutsDialogOpen);
           break;
+        }
 
-        case "g":
+        case "g": {
           e.preventDefault();
           const queryStoreG = useQueryStore.getState();
           queryStoreG.addGroup(queryStoreG.rootGroup.id);
           break;
+        }
 
-        case "r":
+        case "r": {
           e.preventDefault();
           const queryStoreR = useQueryStore.getState();
           queryStoreR.addRule(queryStoreR.rootGroup.id);
           break;
+        }
       }
     };
 

@@ -38,7 +38,7 @@ export function executeQuery(
  * Recursively processes children using the group's combinator.
  */
 function evaluateGroup(group: QueryGroup, row: Row): boolean {
-  let combined = false;
+  let combined = true;
 
   if (group.children.length > 0) {
     const results = group.children.map((child) => {

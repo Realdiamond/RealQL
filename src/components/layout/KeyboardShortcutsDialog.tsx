@@ -56,14 +56,15 @@ function ShortcutSection({
   const [isMac, setIsMac] = React.useState(true);
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     setIsMac(typeof window !== "undefined" && navigator.userAgent.includes("Mac"));
   }, []);
 
   if (shortcuts.length === 0) return null;
+  if (!mounted) return null; // Prevent hydration mismatch flash
 
   const formatKey = (key: string) => {
-    if (!mounted) return key; // Prevent hydration mismatch
     if (!isMac) {
       if (key === "⌘") return "Ctrl";
       if (key === "⇧") return "Shift";

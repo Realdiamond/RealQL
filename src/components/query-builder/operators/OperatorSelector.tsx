@@ -33,11 +33,12 @@ export function OperatorSelector({
   const selectedValue = availableOperators.find((o) => o.type === value)?.type ?? availableOperators[0]?.type ?? null;
 
   useEffect(() => {
-    if (selectedValue && value !== selectedValue) {
-      onChange(selectedValue);
+    if (!fieldType) return;
+    const isCompatible = getOperatorsForFieldType(fieldType).some((o) => o.type === value);
+    if (!isCompatible && availableOperators[0]) {
+      onChange(availableOperators[0].type);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, selectedValue]);
+  }, [value, fieldType, availableOperators, onChange]);
 
   return (
     <select

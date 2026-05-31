@@ -141,6 +141,7 @@ export function validateRule(
 
   // Type-specific validations (only if we have schema info)
   if (schemaField) {
+    let numericArrayInvalid = false;
     // Rule 5: Invalid value type — number field with non-numeric value
     if (schemaField.type === "number") {
       if (operatorMeta?.valueCount === "single") {
@@ -159,6 +160,7 @@ export function validateRule(
           if (s === "") return true; // Treat empty/whitespace strings as invalid numbers
           return Number.isNaN(Number(s));
         })) {
+          numericArrayInvalid = true;
           errors.push({
             nodeId: rule.id,
             field: "value",
@@ -185,32 +187,37 @@ export function validateRule(
     if (rule.operator === "between" && Array.isArray(rule.value) && rule.value.length === 2) {
       const [min, max] = rule.value;
       if (schemaField.type === "number") {
-        const minNum = Number(min);
-        const maxNum = Number(max);
-        
-        if (Number.isNaN(minNum) || Number.isNaN(maxNum)) {
-          errors.push({
-            nodeId: rule.id,
-            field: "value",
-            message: "Expected a number",
-            severity: "error",
-          });
-        } else if (maxNum <= minNum) {
-          errors.push({
-            nodeId: rule.id,
-            field: "value",
-            message: "Max must be greater than min",
-            severity: "error",
-          });
+        if (!numericArrayInvalid) {
+          const minNum = Number(min);
+          const maxNum = Number(max);
+          if (maxNum <= minNum) {
+            errors.push({
+              nodeId: rule.id,
+              field: "value",
+              message: "Max must be greater than min",
+              severity: "error",
+            });
+          }
         }
       } else if (schemaField.type === "date") {
-        if (typeof min === "string" && typeof max === "string" && min !== "" && max !== "" && max <= min) {
-          errors.push({
-            nodeId: rule.id,
-            field: "value",
-            message: "Max must be greater than min",
-            severity: "error",
-          });
+        if (typeof min === "string" && typeof max === "string" && min !== "" && max !== "") {
+          const minValid = isValidDate(min);
+          const maxValid = isValidDate(max);
+          if (!minValid || !maxValid) {
+            errors.push({
+              nodeId: rule.id,
+              field: "value",
+              message: "Invalid date format",
+              severity: "error",
+            });
+          } else if (max <= min) {
+            errors.push({
+              nodeId: rule.id,
+              field: "value",
+              message: "Max must be greater than min",
+              severity: "error",
+            });
+          }
         }
       }
     }

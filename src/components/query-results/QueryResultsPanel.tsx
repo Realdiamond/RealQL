@@ -44,6 +44,13 @@ export function QueryResultsPanel() {
 
   // Track the latest execution to discard stale responses
   const executionIdRef = useRef(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const handleExecute = useCallback(() => {
     const thisExecution = ++executionIdRef.current;
@@ -53,8 +60,10 @@ export function QueryResultsPanel() {
     setSort(null);
     setCurrentPage(1);
 
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
     // Simulate network/DB latency for realism
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       // Discard if a newer execution started
       if (thisExecution !== executionIdRef.current) return;
 

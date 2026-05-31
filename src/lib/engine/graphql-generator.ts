@@ -102,16 +102,16 @@ function formatGraphQLCondition(
       return `{ ${field}: { _neq: ${formatGQLValue(value)} } }`;
 
     case "contains":
-      return `{ ${field}: { _ilike: ${formatGQLValue(`%${value}%`)} } }`;
+      return `{ ${field}: { _ilike: ${formatGQLValue(`%${escapeLike(String(value))}%`)} } }`;
 
     case "not_contains":
-      return `{ ${field}: { _nilike: ${formatGQLValue(`%${value}%`)} } }`;
+      return `{ ${field}: { _nilike: ${formatGQLValue(`%${escapeLike(String(value))}%`)} } }`;
 
     case "starts_with":
-      return `{ ${field}: { _ilike: ${formatGQLValue(`${value}%`)} } }`;
+      return `{ ${field}: { _ilike: ${formatGQLValue(`${escapeLike(String(value))}%`)} } }`;
 
     case "ends_with":
-      return `{ ${field}: { _ilike: ${formatGQLValue(`%${value}`)} } }`;
+      return `{ ${field}: { _ilike: ${formatGQLValue(`%${escapeLike(String(value))}`)} } }`;
 
     case "greater_than":
       return `{ ${field}: { _gt: ${formatGQLValue(value)} } }`;
@@ -159,6 +159,11 @@ function formatGQLValue(value: unknown): string {
   if (typeof value === "boolean") return value ? "true" : "false";
   // String — use JSON.stringify for proper escaping
   return JSON.stringify(String(value));
+}
+
+/** Escape special characters for SQL/GraphQL LIKE syntax */
+function escapeLike(str: string): string {
+  return str.replace(/[\\%_]/g, "\\$&");
 }
 
 /**

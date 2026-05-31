@@ -67,7 +67,7 @@ export function ResultsToolbar({
                 {matchedCount}
               </span>
               {" / "}
-              {totalCount} rows
+              {totalCount ?? "—"} rows
             </span>
 
             {executionTimeMs !== null && (

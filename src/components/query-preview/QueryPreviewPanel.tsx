@@ -78,9 +78,9 @@ export function QueryPreviewPanel() {
               ? "flex items-center gap-2 mt-3 px-3 py-2 rounded-md text-xs"
               : "sr-only",
             errorCount > 0
-              ? "bg-[color:var(--color-error)]/10 text-[var(--color-error)]"
+              ? "bg-[var(--error)]/10 text-[var(--error)]"
               : warningCount > 0
-                ? "bg-[color:var(--color-warning)]/10 text-[var(--color-warning)]"
+                ? "bg-[var(--warning)]/10 text-[var(--warning)]"
                 : ""
           )}
         >

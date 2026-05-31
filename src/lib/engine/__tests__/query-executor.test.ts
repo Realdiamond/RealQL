@@ -61,11 +61,11 @@ describe("Query Executor", () => {
   });
 
   // --- Empty group ---
-  it("should return no matches for an empty group", () => {
+  it("should return match-all for an empty group", () => {
     const group = makeGroup([]);
     const result = executeQuery(group, SAMPLE_DATA);
-    expect(result.matchedCount).toBe(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.matchedCount).toBe(5);
+    expect(result.data).toHaveLength(5);
     expect(result.totalCount).toBe(5);
   });
 

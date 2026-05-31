@@ -57,7 +57,7 @@ describe("MongoDB Generator", () => {
   it("should generate $not/$regex for not_contains", () => {
     const group = makeGroup([makeRule({ operator: "not_contains", value: "spam" })]);
     const filter = generateMongoFilter(group);
-    expect(filter).toEqual({ name: { $not: { $regex: "spam", $options: "i" } } });
+    expect(filter).toEqual({ name: { $not: /spam/i } });
   });
 
   it("should generate starts_with regex", () => {
