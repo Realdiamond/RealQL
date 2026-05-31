@@ -13,10 +13,10 @@ export default function Home() {
     <>
       <Header />
       <AppShell>
-        <main className="flex flex-1 overflow-hidden">
+        <main className="flex flex-col lg:flex-row flex-1 overflow-hidden">
           {/* Left: Query builder panel */}
           <section
-            className="flex flex-1 flex-col overflow-hidden border-r border-[var(--border)]"
+            className="flex flex-1 flex-col overflow-hidden border-b lg:border-b-0 lg:border-r border-[var(--border)]"
             aria-label="Query builder"
           >
             <QueryBuilder />
@@ -24,7 +24,7 @@ export default function Home() {
 
           {/* Right: Preview panel placeholder (PR 7) */}
           <aside
-            className="w-[400px] flex flex-col overflow-hidden bg-[var(--surface-secondary)]"
+            className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-[var(--border)] flex flex-col overflow-hidden bg-[var(--surface-secondary)]"
             aria-label="Query preview"
           >
             <div className="px-4 py-3 border-b border-[var(--border)]">

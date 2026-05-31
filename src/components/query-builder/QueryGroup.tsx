@@ -33,15 +33,13 @@ export function QueryGroup({
   depth = 0,
   isRoot = false,
 }: QueryGroupProps) {
-  const {
-    addRule,
-    addGroup,
-    removeNode,
-    toggleCombinator,
-    toggleCollapse,
-    updateRule,
-    duplicateNode,
-  } = useQueryStore();
+  const addRule = useQueryStore((s) => s.addRule);
+  const addGroup = useQueryStore((s) => s.addGroup);
+  const removeNode = useQueryStore((s) => s.removeNode);
+  const toggleCombinator = useQueryStore((s) => s.toggleCombinator);
+  const toggleCollapse = useQueryStore((s) => s.toggleCollapse);
+  const updateRule = useQueryStore((s) => s.updateRule);
+  const duplicateNode = useQueryStore((s) => s.duplicateNode);
 
   const totalRules = collectRules(group).length;
 

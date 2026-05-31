@@ -23,7 +23,7 @@ export function RuleActions({
   onToggleDisable,
 }: RuleActionsProps) {
   return (
-    <div className="flex items-center gap-0.5 opacity-0 group-hover/rule:opacity-100 transition-opacity duration-150">
+    <div className="flex items-center gap-0.5 opacity-0 group-hover/rule:opacity-100 group-focus-within/rule:opacity-100 transition-opacity duration-150">
       <button
         type="button"
         onClick={onToggleDisable}

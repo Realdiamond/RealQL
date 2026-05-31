@@ -11,7 +11,6 @@
 import { useQueryStore } from "@/lib/store/query-store";
 import { QueryGroup } from "./QueryGroup";
 import { SCHEMAS } from "@/lib/schemas/registry";
-import type { SchemaId } from "@/lib/schemas/registry";
 import { cn } from "@/lib/utils/cn";
 import { Database, RotateCcw, Undo2, Redo2 } from "lucide-react";
 import {
@@ -54,7 +53,11 @@ export function QueryBuilder() {
           </div>
           <Select
             value={activeSchemaId}
-            onValueChange={(val) => setSchema(val as SchemaId)}
+            onValueChange={(val) => {
+              if (val === "users" || val === "products" || val === "orders") {
+                setSchema(val);
+              }
+            }}
           >
             <SelectTrigger
               className={cn(

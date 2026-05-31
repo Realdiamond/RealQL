@@ -49,6 +49,7 @@ export function GroupToolbar({
           "transition-colors duration-150"
         )}
         aria-label={collapsed ? "Expand group" : "Collapse group"}
+        aria-expanded={!collapsed}
       >
         {collapsed ? (
           <ChevronRight className="h-4 w-4" />
