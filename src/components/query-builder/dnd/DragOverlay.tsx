@@ -86,7 +86,7 @@ function DragGhost({ node }: { node: QueryNode }) {
               className={
                 node.combinator === "AND"
                   ? "text-[var(--indigo-500)]"
-                  : "text-[var(--warning)]"
+                  : "text-[var(--color-warning)]"
               }
             >
               {node.combinator}

@@ -113,15 +113,19 @@ export function HistorySidebar() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="history-sidebar-title"
             className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">
+              <h2 id="history-sidebar-title" className="text-sm font-semibold text-[var(--foreground)]">
                 Query History & Presets
               </h2>
               <button
                 onClick={() => setOpen(false)}
+                aria-label="Close history sidebar"
                 className="rounded-md p-1.5 text-[var(--gray-500)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]"
               >
                 <X size={16} />
@@ -129,8 +133,10 @@ export function HistorySidebar() {
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-[var(--border)] px-4 pt-2">
+            <div role="tablist" className="flex border-b border-[var(--border)] px-4 pt-2">
               <button
+                role="tab"
+                aria-selected={activeTab === "history"}
                 onClick={() => setActiveTab("history")}
                 className={cn(
                   "relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors",
@@ -149,6 +155,8 @@ export function HistorySidebar() {
                 )}
               </button>
               <button
+                role="tab"
+                aria-selected={activeTab === "presets"}
                 onClick={() => setActiveTab("presets")}
                 className={cn(
                   "relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors",
@@ -209,7 +217,7 @@ export function HistorySidebar() {
                             </span>
                             <button
                               onClick={() => handleLoad(item)}
-                              className="opacity-0 group-hover:opacity-100 flex items-center gap-1 rounded px-2 py-1 text-[10px] font-medium bg-[var(--accent-100)] text-[var(--accent-700)] dark:bg-[var(--accent-900)/40] dark:text-[var(--accent-300)] hover:bg-[var(--accent-200)] transition-colors"
+                              className="opacity-0 group-hover:opacity-100 flex items-center gap-1 rounded px-2 py-1 text-[10px] font-medium bg-[var(--accent-100)] text-[var(--accent-700)] dark:bg-[var(--accent-900)]/40 dark:text-[var(--accent-300)] hover:bg-[var(--accent-200)] transition-colors"
                             >
                               <Play size={10} /> Load Query
                             </button>
@@ -261,7 +269,7 @@ export function HistorySidebar() {
                             </span>
                             <button
                               onClick={() => handleLoad(item)}
-                              className="flex items-center gap-1 rounded px-2 py-1 text-[10px] font-medium bg-[var(--accent-100)] text-[var(--accent-700)] dark:bg-[var(--accent-900)/40] dark:text-[var(--accent-300)] hover:bg-[var(--accent-200)] transition-colors"
+                              className="flex items-center gap-1 rounded px-2 py-1 text-[10px] font-medium bg-[var(--accent-100)] text-[var(--accent-700)] dark:bg-[var(--accent-900)]/40 dark:text-[var(--accent-300)] hover:bg-[var(--accent-200)] transition-colors"
                             >
                               <Play size={10} /> Load Preset
                             </button>

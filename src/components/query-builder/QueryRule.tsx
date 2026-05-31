@@ -77,7 +77,7 @@ export function QueryRule({
         "bg-[var(--surface)] hover:bg-[var(--surface-secondary)]",
         "border transition-colors duration-150",
         hasErrors
-          ? "border-[var(--error)]/50"
+          ? "border-[var(--color-error)]/50"
           : "border-[var(--border)]",
         rule.disabled && "opacity-50"
       )}

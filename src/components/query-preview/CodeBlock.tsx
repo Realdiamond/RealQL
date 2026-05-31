@@ -132,7 +132,7 @@ function highlightSQL(code: string): string {
   return code.replace(regex, (match, str, kw, num) => {
     if (str) return `<span style="color: var(--success);">${str}</span>`;
     if (kw) return `<span style="color: var(--indigo-400); font-weight: 600;">${kw}</span>`;
-    if (num) return `<span style="color: var(--warning);">${num}</span>`;
+    if (num) return `<span style="color: var(--color-warning);">${num}</span>`;
     return match;
   });
 }
@@ -145,7 +145,7 @@ function highlightJSON(code: string): string {
     if (opKey) return `<span style="color: var(--indigo-400); font-weight: 600;">${opKey}</span>`;
     if (regKey) return `<span style="color: var(--foreground);">${regKey}</span>`;
     if (strVal) return `<span style="color: var(--success);">${strVal}</span>`;
-    if (num) return `<span style="color: var(--warning);">${num}</span>`;
+    if (num) return `<span style="color: var(--color-warning);">${num}</span>`;
     if (bool) return `<span style="color: var(--indigo-400);">${bool}</span>`;
     return match;
   });
@@ -159,8 +159,8 @@ function highlightGraphQL(code: string): string {
   return code.replace(regex, (match, str, kw, op, num) => {
     if (str) return `<span style="color: var(--success);">${str}</span>`;
     if (kw) return `<span style="color: var(--indigo-400); font-weight: 600;">${kw}</span>`;
-    if (op) return `<span style="color: var(--warning);">${op}</span>`;
-    if (num) return `<span style="color: var(--warning);">${num}</span>`;
+    if (op) return `<span style="color: var(--color-warning);">${op}</span>`;
+    if (num) return `<span style="color: var(--color-warning);">${num}</span>`;
     return match;
   });
 }

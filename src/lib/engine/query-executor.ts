@@ -158,7 +158,7 @@ function applyOperator(
     case "regex": {
       if (typeof ruleValue !== "string" || ruleValue === "") return true;
       try {
-        const re = new RegExp(ruleValue, "i");
+        const re = new RegExp(ruleValue);
         return re.test(toString(fieldValue));
       } catch {
         // Invalid regex pattern — don't crash, just skip

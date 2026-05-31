@@ -93,16 +93,16 @@ function formatSQLCondition(
       return `${field} != ${escapeValue(value)}`;
 
     case "contains":
-      return `${field} LIKE ${escapeValue(`%${escapeLike(value)}%`)} ESCAPE '\\'`;
+      return `${field} ILIKE ${escapeValue(`%${escapeLike(value)}%`)} ESCAPE '\\'`;
 
     case "not_contains":
-      return `${field} NOT LIKE ${escapeValue(`%${escapeLike(value)}%`)} ESCAPE '\\'`;
+      return `${field} NOT ILIKE ${escapeValue(`%${escapeLike(value)}%`)} ESCAPE '\\'`;
 
     case "starts_with":
-      return `${field} LIKE ${escapeValue(`${escapeLike(value)}%`)} ESCAPE '\\'`;
+      return `${field} ILIKE ${escapeValue(`${escapeLike(value)}%`)} ESCAPE '\\'`;
 
     case "ends_with":
-      return `${field} LIKE ${escapeValue(`%${escapeLike(value)}`)} ESCAPE '\\'`;
+      return `${field} ILIKE ${escapeValue(`%${escapeLike(value)}`)} ESCAPE '\\'`;
 
     case "greater_than":
       return `${field} > ${escapeValue(value)}`;
