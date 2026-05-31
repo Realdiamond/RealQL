@@ -43,15 +43,18 @@ export const useResultsStore = create<ResultsState>((set) => ({
   },
 
   setResult: (result) => {
-    set({
-      status: "success",
-      result,
-      error: null,
-      pagination: {
-        page: 1,
-        pageSize: 20,
-        totalPages: Math.ceil(result.matchedCount / 20),
-      },
+    set((state) => {
+      const pageSize = Math.max(1, state.pagination.pageSize || 20);
+      return {
+        status: "success",
+        result,
+        error: null,
+        pagination: {
+          page: 1,
+          pageSize,
+          totalPages: Math.max(1, Math.ceil(result.matchedCount / pageSize)),
+        },
+      };
     });
   },
 
@@ -70,22 +73,29 @@ export const useResultsStore = create<ResultsState>((set) => ({
   },
 
   setPage: (page) => {
-    set((state) => ({
-      pagination: { ...state.pagination, page },
-    }));
+    set((state) => {
+      const safeTotalPages = Math.max(1, state.pagination.totalPages || 1);
+      const clampedPage = Math.min(Math.max(1, page), safeTotalPages);
+      return {
+        pagination: { ...state.pagination, page: clampedPage },
+      };
+    });
   },
 
   setPageSize: (pageSize) => {
-    set((state) => ({
-      pagination: {
-        ...state.pagination,
-        pageSize,
-        page: 1,
-        totalPages: state.result
-          ? Math.ceil(state.result.matchedCount / pageSize)
-          : 0,
-      },
-    }));
+    set((state) => {
+      const safePageSize = Math.max(1, pageSize);
+      return {
+        pagination: {
+          ...state.pagination,
+          pageSize: safePageSize,
+          page: 1,
+          totalPages: state.result
+            ? Math.max(1, Math.ceil(state.result.matchedCount / safePageSize))
+            : 0,
+        },
+      };
+    });
   },
 
   setSort: (sort) => {

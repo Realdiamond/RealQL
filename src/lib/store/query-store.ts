@@ -23,10 +23,16 @@ import {
   cloneNode,
   findNode,
   getMaxDepth,
+  getNodeDepth,
 } from "@/lib/engine/tree-utils";
 
 const MAX_UNDO_STACK = 50;
 const MAX_NESTING_DEPTH = 20;
+
+interface HistorySnapshot {
+  rootGroup: QueryGroup;
+  activeSchemaId: SchemaId;
+}
 
 function createEmptyRoot(): QueryGroup {
   return {
@@ -63,8 +69,8 @@ interface QueryState {
   activeSchemaId: SchemaId;
 
   // Undo/redo stacks
-  undoStack: QueryGroup[];
-  redoStack: QueryGroup[];
+  undoStack: HistorySnapshot[];
+  redoStack: HistorySnapshot[];
 
   // Actions
   addRule: (parentId: string) => void;
@@ -83,8 +89,9 @@ interface QueryState {
   redo: () => void;
 }
 
-function pushUndo(state: QueryState): { undoStack: QueryGroup[]; redoStack: QueryGroup[] } {
-  const newStack = [state.rootGroup, ...state.undoStack].slice(0, MAX_UNDO_STACK);
+function pushUndo(state: QueryState): { undoStack: HistorySnapshot[]; redoStack: HistorySnapshot[] } {
+  const snapshot: HistorySnapshot = { rootGroup: state.rootGroup, activeSchemaId: state.activeSchemaId };
+  const newStack = [snapshot, ...state.undoStack].slice(0, MAX_UNDO_STACK);
   return { undoStack: newStack, redoStack: [] };
 }
 
@@ -106,12 +113,18 @@ export const useQueryStore = create<QueryState>((set, get) => ({
     const parentNode = findNode(state.rootGroup, parentId);
     if (!parentNode || parentNode.type !== "group") return;
 
-    // Enforce max depth
-    if (getMaxDepth(state.rootGroup) >= MAX_NESTING_DEPTH) return;
+    // Enforce max depth by target parent + new subtree
+    const parentDepth = getNodeDepth(state.rootGroup, parentId);
+    if (parentDepth === -1) return;
+    
+    const newGroup = createDefaultGroup();
+    const subtreeDepth = getMaxDepth(newGroup); // 1
+    
+    if (parentDepth + subtreeDepth > MAX_NESTING_DEPTH) return;
 
     set((state) => ({
       ...pushUndo(state),
-      rootGroup: insertNode(state.rootGroup, parentId, createDefaultGroup()),
+      rootGroup: insertNode(state.rootGroup, parentId, newGroup),
     }));
   },
 
@@ -141,10 +154,27 @@ export const useQueryStore = create<QueryState>((set, get) => ({
   },
 
   moveNode: (nodeId, targetParentId, targetIndex) => {
-    set((state) => ({
-      ...pushUndo(state),
-      rootGroup: moveNode(state.rootGroup, nodeId, targetParentId, targetIndex),
-    }));
+    const state = get();
+    const node = findNode(state.rootGroup, nodeId);
+    if (!node) return;
+
+    const targetDepth = getNodeDepth(state.rootGroup, targetParentId);
+    if (targetDepth === -1) return;
+
+    // A group has >= 1 depth. A rule alone isn't nested, so it adds 0 depth structure
+    const subtreeDepth = node.type === "group" ? getMaxDepth(node as QueryGroup) : 0;
+    
+    if (targetDepth + subtreeDepth > MAX_NESTING_DEPTH) return;
+
+    set((state) => {
+      const newRoot = moveNode(state.rootGroup, nodeId, targetParentId, targetIndex);
+      if (newRoot === state.rootGroup) return state; // Move rejected
+      
+      return {
+        ...pushUndo(state),
+        rootGroup: newRoot,
+      };
+    });
   },
 
   toggleCombinator: (groupId) => {
@@ -199,6 +229,9 @@ export const useQueryStore = create<QueryState>((set, get) => ({
   },
 
   setSchema: (schemaId) => {
+    const state = get();
+    if (state.activeSchemaId === schemaId) return;
+
     set((state) => ({
       ...pushUndo(state),
       activeSchemaId: schemaId,
@@ -225,10 +258,12 @@ export const useQueryStore = create<QueryState>((set, get) => ({
       if (state.undoStack.length === 0) return state;
 
       const [previous, ...rest] = state.undoStack;
+      const currentSnapshot: HistorySnapshot = { rootGroup: state.rootGroup, activeSchemaId: state.activeSchemaId };
       return {
-        rootGroup: previous,
+        rootGroup: previous.rootGroup,
+        activeSchemaId: previous.activeSchemaId,
         undoStack: rest,
-        redoStack: [state.rootGroup, ...state.redoStack],
+        redoStack: [currentSnapshot, ...state.redoStack],
       };
     });
   },
@@ -238,9 +273,11 @@ export const useQueryStore = create<QueryState>((set, get) => ({
       if (state.redoStack.length === 0) return state;
 
       const [next, ...rest] = state.redoStack;
+      const currentSnapshot: HistorySnapshot = { rootGroup: state.rootGroup, activeSchemaId: state.activeSchemaId };
       return {
-        rootGroup: next,
-        undoStack: [state.rootGroup, ...state.undoStack],
+        rootGroup: next.rootGroup,
+        activeSchemaId: next.activeSchemaId,
+        undoStack: [currentSnapshot, ...state.undoStack],
         redoStack: rest,
       };
     });

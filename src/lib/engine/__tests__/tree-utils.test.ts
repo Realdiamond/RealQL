@@ -240,6 +240,22 @@ describe("moveNode", () => {
     const result = moveNode(root, "missing", "root", 0);
     expect(result).toBe(root);
   });
+
+  it("returns unchanged tree if targetParentId is invalid", () => {
+    const root = makeGroup([makeRule({ id: "r1" })], { id: "root" });
+    const result = moveNode(root, "r1", "missingParent", 0);
+    expect(result).toBe(root);
+  });
+
+  it("returns unchanged tree if target is a descendant of the moved node", () => {
+    const childGroup = makeGroup([], { id: "child" });
+    const parentGroup = makeGroup([childGroup], { id: "parent" });
+    const root = makeGroup([parentGroup], { id: "root" });
+
+    // Try to move parentGroup into childGroup
+    const result = moveNode(root, "parent", "child", 0);
+    expect(result).toBe(root);
+  });
 });
 
 describe("cloneNode", () => {
