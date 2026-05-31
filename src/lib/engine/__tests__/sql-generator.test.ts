@@ -51,25 +51,25 @@ describe("SQL Generator", () => {
   it("should generate contains (LIKE)", () => {
     const group = makeGroup([makeRule({ operator: "contains", value: "test" })]);
     const where = generateSQLWhere(group);
-    expect(where).toBe("\"name\" LIKE '%test%'");
+    expect(where).toBe(`"name" LIKE '%test%' ESCAPE '\\'`);
   });
 
   it("should generate not_contains (NOT LIKE)", () => {
     const group = makeGroup([makeRule({ operator: "not_contains", value: "spam" })]);
     const where = generateSQLWhere(group);
-    expect(where).toBe("\"name\" NOT LIKE '%spam%'");
+    expect(where).toBe(`"name" NOT LIKE '%spam%' ESCAPE '\\'`);
   });
 
   it("should generate starts_with", () => {
     const group = makeGroup([makeRule({ operator: "starts_with", value: "Jo" })]);
     const where = generateSQLWhere(group);
-    expect(where).toBe("\"name\" LIKE 'Jo%'");
+    expect(where).toBe(`"name" LIKE 'Jo%' ESCAPE '\\'`);
   });
 
   it("should generate ends_with", () => {
     const group = makeGroup([makeRule({ operator: "ends_with", value: "hn" })]);
     const where = generateSQLWhere(group);
-    expect(where).toBe("\"name\" LIKE '%hn'");
+    expect(where).toBe(`"name" LIKE '%hn' ESCAPE '\\'`);
   });
 
   it("should generate greater_than", () => {
