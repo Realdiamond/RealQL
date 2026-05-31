@@ -83,6 +83,20 @@ describe("GraphQL Generator", () => {
     expect(where).toContain("18");
   });
 
+  it("should generate _lt for less_than", () => {
+    const group = makeGroup([makeRule({ field: "age", operator: "less_than", value: 18 })]);
+    const where = generateGraphQLWhere(group);
+    expect(where).toContain("_lt");
+    expect(where).toContain("18");
+  });
+
+  it("should generate _gte for greater_than_or_equal", () => {
+    const group = makeGroup([makeRule({ field: "age", operator: "greater_than_or_equal", value: 18 })]);
+    const where = generateGraphQLWhere(group);
+    expect(where).toContain("_gte");
+    expect(where).toContain("18");
+  });
+
   it("should generate _lte for less_than_or_equal", () => {
     const group = makeGroup([makeRule({ field: "age", operator: "less_than_or_equal", value: 65 })]);
     const where = generateGraphQLWhere(group);

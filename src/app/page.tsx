@@ -2,6 +2,7 @@ import { Header } from "@/components/layout/Header";
 import { AppShell } from "@/components/layout/AppShell";
 import { QueryBuilder } from "@/components/query-builder/QueryBuilder";
 import { QueryPreviewPanel } from "@/components/query-preview/QueryPreviewPanel";
+import { QueryResultsPanel } from "@/components/query-results/QueryResultsPanel";
 
 export const metadata = {
   title: "RealQL — Visual Query Builder",
@@ -23,15 +24,24 @@ export default function Home() {
             <QueryBuilder />
           </section>
 
-          {/* Right: Live query preview */}
+          {/* Right: Preview + Results stacked */}
           <aside
-            className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-[var(--border)] flex flex-col overflow-hidden bg-[var(--surface-secondary)]"
-            aria-label="Query preview"
+            className="w-full lg:w-[440px] flex flex-col overflow-hidden bg-[var(--surface-secondary)]"
+            aria-label="Query output"
           >
-            <QueryPreviewPanel />
+            {/* Top: Live query preview */}
+            <div className="border-b border-[var(--border)] max-h-[45%] overflow-auto">
+              <QueryPreviewPanel />
+            </div>
+
+            {/* Bottom: Execution results */}
+            <div className="flex-1 overflow-hidden">
+              <QueryResultsPanel />
+            </div>
           </aside>
         </main>
       </AppShell>
     </>
   );
 }
+

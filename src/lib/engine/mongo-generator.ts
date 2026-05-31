@@ -160,12 +160,19 @@ function formatMongoCondition(
 function typedValue(value: unknown): unknown {
   if (typeof value === "number" || typeof value === "boolean") return value;
   if (typeof value === "string") {
-    // Try numeric conversion
-    const num = Number(value);
-    if (!Number.isNaN(num) && value.trim() !== "") return num;
+    const trimmed = value.trim();
+    
+    // Strict numeric match: no leading zeros unless it's just "0" or "0.x"
+    if (/^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(trimmed)) {
+      const num = Number(trimmed);
+      if (Number.isFinite(num) && num <= Number.MAX_SAFE_INTEGER && num >= Number.MIN_SAFE_INTEGER) {
+        return num;
+      }
+    }
+
     // Try boolean
-    if (value === "true") return true;
-    if (value === "false") return false;
+    if (trimmed === "true") return true;
+    if (trimmed === "false") return false;
   }
   return value;
 }

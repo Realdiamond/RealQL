@@ -78,6 +78,18 @@ describe("MongoDB Generator", () => {
     expect(filter).toEqual({ age: { $gt: 18 } });
   });
 
+  it("should generate $lt for less_than", () => {
+    const group = makeGroup([makeRule({ field: "age", operator: "less_than", value: 18 })]);
+    const filter = generateMongoFilter(group);
+    expect(filter).toEqual({ age: { $lt: 18 } });
+  });
+
+  it("should generate $gte for greater_than_or_equal", () => {
+    const group = makeGroup([makeRule({ field: "age", operator: "greater_than_or_equal", value: 18 })]);
+    const filter = generateMongoFilter(group);
+    expect(filter).toEqual({ age: { $gte: 18 } });
+  });
+
   it("should generate $lte for less_than_or_equal", () => {
     const group = makeGroup([makeRule({ field: "age", operator: "less_than_or_equal", value: 65 })]);
     const filter = generateMongoFilter(group);
