@@ -23,8 +23,8 @@ export function RangeValueInput({
   disabled,
   onChange,
 }: RangeValueInputProps) {
-  const min = value ? String(value[0]) : "";
-  const max = value ? String(value[1]) : "";
+  const min = value && !Number.isNaN(value[0]) ? String(value[0]) : "";
+  const max = value && !Number.isNaN(value[1]) ? String(value[1]) : "";
   const isDate = fieldType === "date";
   const inputType = isDate ? "date" : "number";
 

@@ -34,9 +34,9 @@ export function ValidationMessage({ errors }: ValidationMessageProps) {
           role="alert"
         >
           {error.severity === "error" ? (
-            <AlertCircle className="h-3 w-3 shrink-0" />
+            <AlertCircle className="h-3 w-3 shrink-0" aria-hidden="true" />
           ) : (
-            <AlertTriangle className="h-3 w-3 shrink-0" />
+            <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" />
           )}
           <span>{error.message}</span>
         </div>

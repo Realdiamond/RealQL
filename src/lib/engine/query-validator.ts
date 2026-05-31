@@ -142,14 +142,30 @@ export function validateRule(
   // Type-specific validations (only if we have schema info)
   if (schemaField) {
     // Rule 5: Invalid value type — number field with non-numeric value
-    if (schemaField.type === "number" && operatorMeta?.valueCount === "single") {
-      if (typeof rule.value === "string" && rule.value !== "" && isNaN(Number(rule.value))) {
-        errors.push({
-          nodeId: rule.id,
-          field: "value",
-          message: "Expected a number",
-          severity: "error",
-        });
+    if (schemaField.type === "number") {
+      if (operatorMeta?.valueCount === "single") {
+        if (rule.value !== "" && rule.value !== null && rule.value !== undefined && Number.isNaN(Number(rule.value))) {
+          errors.push({
+            nodeId: rule.id,
+            field: "value",
+            message: "Expected a number",
+            severity: "error",
+          });
+        }
+      } else if (operatorMeta?.valueCount === "array" && Array.isArray(rule.value)) {
+        if (rule.value.some(v => {
+          if (v === null || v === undefined) return false;
+          const s = String(v).trim();
+          if (s === "") return true; // Treat empty/whitespace strings as invalid numbers
+          return Number.isNaN(Number(s));
+        })) {
+          errors.push({
+            nodeId: rule.id,
+            field: "value",
+            message: "Expected all values to be numbers",
+            severity: "error",
+          });
+        }
       }
     }
 
@@ -172,7 +188,7 @@ export function validateRule(
         const minNum = Number(min);
         const maxNum = Number(max);
         
-        if (isNaN(minNum) || isNaN(maxNum)) {
+        if (Number.isNaN(minNum) || Number.isNaN(maxNum)) {
           errors.push({
             nodeId: rule.id,
             field: "value",
@@ -230,8 +246,18 @@ function isValueEmpty(value: QueryRule["value"]): boolean {
  */
 function isValidDate(dateStr: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
-  const date = new Date(dateStr + "T00:00:00");
-  return !isNaN(date.getTime());
+  
+  const [yearStr, monthStr, dayStr] = dateStr.split("-");
+  const year = parseInt(yearStr, 10);
+  const month = parseInt(monthStr, 10);
+  const day = parseInt(dayStr, 10);
+  
+  const date = new Date(year, month - 1, day);
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() + 1 === month &&
+    date.getDate() === day
+  );
 }
 
 /**

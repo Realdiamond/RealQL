@@ -8,8 +8,9 @@
  * on every keystroke. Returns the current list of errors.
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useMemo } from "react";
 import { validateQuery } from "@/lib/engine/query-validator";
+import { useDebounce } from "@/hooks/use-debounce";
 import type { QueryGroup, ValidationError, SchemaField } from "@/lib/types";
 
 const DEBOUNCE_MS = 300;
@@ -18,27 +19,13 @@ export function useQueryValidation(
   rootGroup: QueryGroup,
   fields: SchemaField[]
 ): ValidationError[] {
-  const [errors, setErrors] = useState<ValidationError[]>([]);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Debounce the entire rootGroup state to prevent excessive validation on every keystroke
+  const debouncedGroup = useDebounce(rootGroup, DEBOUNCE_MS);
 
-  useEffect(() => {
-    // Clear any pending timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Debounce validation
-    timeoutRef.current = setTimeout(() => {
-      const result = validateQuery(rootGroup, fields);
-      setErrors(result);
-    }, DEBOUNCE_MS);
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [rootGroup, fields]);
+  // Derived state: strictly compute errors from the debounced state
+  const errors = useMemo(() => {
+    return validateQuery(debouncedGroup, fields);
+  }, [debouncedGroup, fields]);
 
   return errors;
 }
