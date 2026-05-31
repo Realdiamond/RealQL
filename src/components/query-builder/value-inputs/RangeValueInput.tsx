@@ -32,12 +32,9 @@ export function RangeValueInput({
     if (isDate) {
       onChange([raw, max]);
     } else {
-      const num = parseFloat(raw);
-      const parsedMax = max === "" ? "" : (isNaN(parseFloat(max)) ? 0 : parseFloat(max));
-      onChange([
-        isNaN(num) ? (raw === "" ? "" : 0) : num,
-        parsedMax,
-      ] as [number, number] | [string, string]);
+      const num = raw === "" ? NaN : parseFloat(raw);
+      const parsedMax = max === "" ? NaN : parseFloat(max);
+      onChange([num, parsedMax] as [number, number]);
     }
   };
 
@@ -45,12 +42,9 @@ export function RangeValueInput({
     if (isDate) {
       onChange([min, raw]);
     } else {
-      const num = parseFloat(raw);
-      const parsedMin = min === "" ? "" : (isNaN(parseFloat(min)) ? 0 : parseFloat(min));
-      onChange([
-        parsedMin,
-        isNaN(num) ? (raw === "" ? "" : 0) : num,
-      ] as [number, number] | [string, string]);
+      const num = raw === "" ? NaN : parseFloat(raw);
+      const parsedMin = min === "" ? NaN : parseFloat(min);
+      onChange([parsedMin, num] as [number, number]);
     }
   };
 

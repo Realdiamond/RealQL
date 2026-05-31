@@ -7,7 +7,7 @@
  * Displays existing tags as removable badges.
  */
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -27,6 +27,7 @@ export function ArrayValueInput({
   onChange,
 }: ArrayValueInputProps) {
   const [inputValue, setInputValue] = useState("");
+  const datalistId = useId();
 
   const addValues = (raw: string) => {
     let newItems = raw
@@ -111,11 +112,11 @@ export function ArrayValueInput({
           "placeholder:text-[var(--gray-400)]"
         )}
         aria-label="Add values"
-        list={enumValues ? "enum-options" : undefined}
+        list={enumValues ? datalistId : undefined}
       />
       {enumValues && (
-        <datalist id="enum-options">
-          {enumValues.filter(v => !value.includes(v)).map(v => (
+        <datalist id={datalistId}>
+          {enumValues.filter((v) => !value.includes(v)).map((v) => (
             <option key={v} value={v} />
           ))}
         </datalist>

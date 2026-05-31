@@ -10,9 +10,10 @@
 
 import { useQueryStore } from "@/lib/store/query-store";
 import { QueryGroup } from "./QueryGroup";
-import { SCHEMAS, type SchemaId } from "@/lib/schemas/registry";
+import { SCHEMAS, type SchemaId, getSchema } from "@/lib/schemas/registry";
 import { cn } from "@/lib/utils/cn";
 import { Database, RotateCcw, Undo2, Redo2 } from "lucide-react";
+import { useQueryValidation } from "@/hooks/use-query-validation";
 import {
   Select,
   SelectContent,
@@ -32,6 +33,13 @@ export function QueryBuilder() {
     undoStack,
     redoStack,
   } = useQueryStore();
+
+  // Resolve active schema fields for validation
+  const schema = getSchema(activeSchemaId);
+  const fields = schema?.fields ?? [];
+
+  // Run debounced validation against the full query tree
+  const validationErrors = useQueryValidation(rootGroup, fields);
 
   return (
     <div className="flex flex-col h-full">
@@ -145,7 +153,7 @@ export function QueryBuilder() {
 
       {/* Query tree */}
       <div className="flex-1 overflow-y-auto p-4">
-        <QueryGroup group={rootGroup} depth={0} isRoot />
+        <QueryGroup group={rootGroup} depth={0} isRoot validationErrors={validationErrors} />
       </div>
     </div>
   );
