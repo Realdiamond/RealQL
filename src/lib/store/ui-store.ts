@@ -12,6 +12,9 @@ interface UIState {
   sidebarOpen: boolean;
   previewFormat: QueryOutputFormat;
   shortcutsDialogOpen: boolean;
+  historySidebarOpen: boolean;
+  activeHistoryTab?: string;
+  savePresetDialogOpen: boolean;
 
   // Actions
   toggleSidebar: () => void;
@@ -19,6 +22,8 @@ interface UIState {
   setPreviewFormat: (format: QueryOutputFormat) => void;
   cyclePreviewFormat: () => void;
   setShortcutsDialogOpen: (open: boolean) => void;
+  setHistorySidebarOpen: (open: boolean) => void;
+  setSavePresetDialogOpen: (open: boolean) => void;
 }
 
 const FORMAT_CYCLE: QueryOutputFormat[] = ["sql", "mongodb", "graphql"];
@@ -27,6 +32,8 @@ export const useUIStore = create<UIState>((set) => ({
   sidebarOpen: true,
   previewFormat: "sql",
   shortcutsDialogOpen: false,
+  historySidebarOpen: false,
+  savePresetDialogOpen: false,
 
   toggleSidebar: () => {
     set((state) => ({ sidebarOpen: !state.sidebarOpen }));
@@ -50,5 +57,13 @@ export const useUIStore = create<UIState>((set) => ({
 
   setShortcutsDialogOpen: (open) => {
     set({ shortcutsDialogOpen: open });
+  },
+
+  setHistorySidebarOpen: (open) => {
+    set({ historySidebarOpen: open });
+  },
+
+  setSavePresetDialogOpen: (open) => {
+    set({ savePresetDialogOpen: open });
   },
 }));

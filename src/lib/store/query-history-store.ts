@@ -1,0 +1,70 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { QueryGroup } from "@/lib/types";
+import { v4 as uuidv4 } from "uuid";
+
+export interface SavedQuery {
+  id: string;
+  name?: string;
+  timestamp: number;
+  rootGroup: QueryGroup;
+}
+
+interface QueryHistoryState {
+  history: SavedQuery[];
+  presets: SavedQuery[];
+  addHistory: (rootGroup: QueryGroup) => void;
+  clearHistory: () => void;
+  deleteHistoryItem: (id: string) => void;
+  savePreset: (name: string, rootGroup: QueryGroup) => void;
+  deletePreset: (id: string) => void;
+}
+
+const MAX_HISTORY_ITEMS = 50;
+
+export const useQueryHistoryStore = create<QueryHistoryState>()(
+  persist(
+    (set) => ({
+      history: [],
+      presets: [],
+
+      addHistory: (rootGroup) =>
+        set((state) => {
+          const newItem: SavedQuery = {
+            id: uuidv4(),
+            timestamp: Date.now(),
+            rootGroup,
+          };
+          const newHistory = [newItem, ...state.history].slice(0, MAX_HISTORY_ITEMS);
+          return { history: newHistory };
+        }),
+
+      clearHistory: () => set({ history: [] }),
+      
+      deleteHistoryItem: (id) =>
+        set((state) => ({
+          history: state.history.filter((item) => item.id !== id),
+        })),
+
+      savePreset: (name, rootGroup) =>
+        set((state) => {
+          const newItem: SavedQuery = {
+            id: uuidv4(),
+            name,
+            timestamp: Date.now(),
+            rootGroup,
+          };
+          // Prepend new preset
+          return { presets: [newItem, ...state.presets] };
+        }),
+
+      deletePreset: (id) =>
+        set((state) => ({
+          presets: state.presets.filter((item) => item.id !== id),
+        })),
+    }),
+    {
+      name: "realql-history-storage",
+    }
+  )
+);

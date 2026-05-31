@@ -13,6 +13,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useQueryStore } from "@/lib/store/query-store";
 import { useShallow } from "zustand/react/shallow";
+import { useQueryHistoryStore } from "@/lib/store/query-history-store";
 import { getSchemaData } from "@/lib/schemas/registry";
 import { executeQuery } from "@/lib/engine/query-executor";
 import type { ExecutionResult, PaginationState, SortState } from "@/lib/types";
@@ -34,6 +35,8 @@ export function QueryResultsPanel() {
       activeSchemaId: state.activeSchemaId,
     }))
   );
+
+  const addHistory = useQueryHistoryStore((state) => state.addHistory);
 
   const [isLoading, setIsLoading] = useState(false);
   const [hasExecuted, setHasExecuted] = useState(false);
@@ -71,9 +74,10 @@ export function QueryResultsPanel() {
       const executionResult = executeQuery(rootGroup, dataset);
 
       setResult(executionResult);
+      addHistory(rootGroup);
       setIsLoading(false);
     }, SIMULATED_DELAY_MS);
-  }, [rootGroup, activeSchemaId]);
+  }, [rootGroup, activeSchemaId, addHistory]);
 
   const handlePageSizeChange = useCallback((size: number) => {
     setPageSize(size);

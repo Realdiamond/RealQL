@@ -1,11 +1,12 @@
 "use client";
 
-import { Layers, Keyboard } from "lucide-react";
+import { Layers, Keyboard, Clock } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useUIStore } from "@/lib/store/ui-store";
 
 export function Header() {
   const setShortcutsDialogOpen = useUIStore((state) => state.setShortcutsDialogOpen);
+  const setHistorySidebarOpen = useUIStore((state) => state.setHistorySidebarOpen);
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-4">
@@ -24,6 +25,14 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-1">
+        <button
+          onClick={() => setHistorySidebarOpen(true)}
+          className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--gray-500)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] transition-colors"
+          title="History & Presets"
+          aria-label="History & Presets"
+        >
+          <Clock className="h-[18px] w-[18px]" />
+        </button>
         <button
           onClick={() => setShortcutsDialogOpen(true)}
           className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--gray-500)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] transition-colors"

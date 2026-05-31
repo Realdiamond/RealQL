@@ -46,10 +46,11 @@ export function useKeyboardShortcuts() {
           }
           break;
 
-        case "s":
+        case "s": {
           e.preventDefault();
-          window.dispatchEvent(new CustomEvent("save-preset"));
+          useUIStore.getState().setSavePresetDialogOpen(true);
           break;
+        }
 
         case "e":
           e.preventDefault();
