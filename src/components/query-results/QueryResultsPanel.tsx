@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useQueryStore } from "@/lib/store/query-store";
 import { useShallow } from "zustand/react/shallow";
 import { getSchemaData } from "@/lib/schemas/registry";
@@ -70,6 +70,13 @@ export function QueryResultsPanel() {
     setPageSize(size);
     setCurrentPage(1);
   }, []);
+
+  // Listen for global execute shortcut
+  useEffect(() => {
+    const onExecuteShortcut = () => handleExecute();
+    window.addEventListener("execute-query", onExecuteShortcut);
+    return () => window.removeEventListener("execute-query", onExecuteShortcut);
+  }, [handleExecute]);
 
   // Compute pagination
   const pagination: PaginationState = {
