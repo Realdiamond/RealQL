@@ -8,12 +8,14 @@
 import { create } from "zustand";
 import type { QueryOutputFormat } from "@/lib/types";
 
+export type AllowedHistoryTab = "history" | "presets";
+
 interface UIState {
   sidebarOpen: boolean;
   previewFormat: QueryOutputFormat;
   shortcutsDialogOpen: boolean;
   historySidebarOpen: boolean;
-  activeHistoryTab?: string;
+  activeHistoryTab?: AllowedHistoryTab;
   savePresetDialogOpen: boolean;
 
   // Actions
@@ -23,6 +25,7 @@ interface UIState {
   cyclePreviewFormat: () => void;
   setShortcutsDialogOpen: (open: boolean) => void;
   setHistorySidebarOpen: (open: boolean) => void;
+  setActiveHistoryTab: (tab: AllowedHistoryTab) => void;
   setSavePresetDialogOpen: (open: boolean) => void;
 }
 
@@ -61,6 +64,10 @@ export const useUIStore = create<UIState>((set) => ({
 
   setHistorySidebarOpen: (open) => {
     set({ historySidebarOpen: open });
+  },
+
+  setActiveHistoryTab: (tab) => {
+    set({ activeHistoryTab: tab });
   },
 
   setSavePresetDialogOpen: (open) => {

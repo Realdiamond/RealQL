@@ -33,7 +33,7 @@ export const useQueryHistoryStore = create<QueryHistoryState>()(
           const newItem: SavedQuery = {
             id: uuidv4(),
             timestamp: Date.now(),
-            rootGroup,
+            rootGroup: structuredClone(rootGroup),
           };
           const newHistory = [newItem, ...state.history].slice(0, MAX_HISTORY_ITEMS);
           return { history: newHistory };
@@ -52,7 +52,7 @@ export const useQueryHistoryStore = create<QueryHistoryState>()(
             id: uuidv4(),
             name,
             timestamp: Date.now(),
-            rootGroup,
+            rootGroup: structuredClone(rootGroup),
           };
           // Prepend new preset
           return { presets: [newItem, ...state.presets] };

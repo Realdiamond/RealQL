@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock, Bookmark, Trash2, Play } from "lucide-react";
 import { useUIStore } from "@/lib/store/ui-store";
@@ -21,12 +21,58 @@ export function HistorySidebar() {
   const loadQuery = useQueryStore((state) => state.loadQuery);
 
   const activeTab = useUIStore((state) => state.activeHistoryTab || "history");
-  const setActiveTab = (tab: string) => useUIStore.setState({ activeHistoryTab: tab });
+  const setActiveTab = useUIStore((state) => state.setActiveHistoryTab);
 
-  // Prevent background scroll when open
+  // Prevent background scroll and handle focus trap when open
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
+      const previouslyFocused = document.activeElement as HTMLElement;
+
+      // Focus first element slightly after mount
+      requestAnimationFrame(() => {
+        const focusable = sidebarRef.current?.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable && focusable.length > 0) {
+          (focusable[0] as HTMLElement).focus();
+        }
+      });
+
+      const handleTab = (e: KeyboardEvent) => {
+        if (e.key === "Tab" && sidebarRef.current) {
+          const focusable = sidebarRef.current.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusable.length === 0) return;
+          const first = focusable[0] as HTMLElement;
+          const last = focusable[focusable.length - 1] as HTMLElement;
+
+          if (e.shiftKey) {
+            if (document.activeElement === first) {
+              last.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === last) {
+              first.focus();
+              e.preventDefault();
+            }
+          }
+        }
+      };
+
+      window.addEventListener("keydown", handleTab);
+
+      return () => {
+        document.body.style.overflow = "";
+        window.removeEventListener("keydown", handleTab);
+        if (previouslyFocused) {
+          previouslyFocused.focus();
+        }
+      };
     } else {
       document.body.style.overflow = "";
     }
@@ -109,6 +155,7 @@ export function HistorySidebar() {
 
           {/* Sidebar */}
           <motion.div
+            ref={sidebarRef}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -256,6 +303,7 @@ export function HistorySidebar() {
                               onClick={() => deletePreset(item.id)}
                               className="text-[var(--gray-400)] hover:text-[var(--danger)] transition-colors"
                               title="Delete preset"
+                              aria-label="Delete preset"
                             >
                               <Trash2 size={14} />
                             </button>
