@@ -12,7 +12,6 @@
 
 import { cn } from "@/lib/utils/cn";
 import { GroupToolbar } from "./GroupToolbar";
-import { QueryRule } from "./QueryRule";
 import { NestingIndicator } from "./NestingIndicator";
 import { EmptyGroupState } from "./EmptyGroupState";
 import { ValidationMessage } from "./ValidationMessage";
@@ -25,12 +24,18 @@ import { useQueryStore } from "@/lib/store/query-store";
 import { collectRules } from "@/lib/engine/tree-utils";
 import { getSchema } from "@/lib/schemas/registry";
 import { getErrorsForNode } from "@/lib/engine/query-validator";
+import type React from "react";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableRule } from "./dnd/SortableRule";
+import { SortableGroup } from "./dnd/SortableGroup";
 
 interface QueryGroupProps {
   group: QueryGroupType;
   depth?: number;
   isRoot?: boolean;
   validationErrors?: ValidationError[];
+  dragHandleRef?: (element: HTMLElement | null) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
 export function QueryGroup({
@@ -38,6 +43,8 @@ export function QueryGroup({
   depth = 0,
   isRoot = false,
   validationErrors = [],
+  dragHandleRef,
+  dragHandleProps,
 }: QueryGroupProps) {
   const addRule = useQueryStore((s) => s.addRule);
   const addGroup = useQueryStore((s) => s.addGroup);
@@ -82,6 +89,8 @@ export function QueryGroup({
           onAddRule={() => addRule(group.id)}
           onAddGroup={() => addGroup(group.id)}
           onDelete={() => removeNode(group.id)}
+          dragHandleRef={dragHandleRef}
+          dragHandleProps={dragHandleProps}
         />
 
         {/* Children — hidden when collapsed */}
@@ -90,35 +99,42 @@ export function QueryGroup({
             {group.children.length === 0 ? (
               <EmptyGroupState onAddRule={() => addRule(group.id)} />
             ) : (
-              group.children.map((child) => {
-                if (child.type === "group") {
-                  // RECURSIVE: render another QueryGroup
+              <SortableContext items={group.children.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                {group.children.map((child) => {
+                  if (child.type === "group") {
+                    // RECURSIVE: render another QueryGroup
+                    return (
+                      <SortableGroup key={child.id} id={child.id}>
+                        {(handleRef, handleProps) => (
+                          <QueryGroup
+                            group={child}
+                            depth={depth + 1}
+                            validationErrors={validationErrors}
+                            dragHandleRef={handleRef}
+                            dragHandleProps={handleProps}
+                          />
+                        )}
+                      </SortableGroup>
+                    );
+                  }
+
+                  // Render a QueryRule
                   return (
-                    <QueryGroup
+                    <SortableRule
                       key={child.id}
-                      group={child}
-                      depth={depth + 1}
+                      rule={child as QueryRuleType}
+                      depth={depth}
+                      fields={fields}
                       validationErrors={validationErrors}
+                      onUpdate={(updates) =>
+                        updateRule(child.id, updates)
+                      }
+                      onDelete={() => removeNode(child.id)}
+                      onDuplicate={() => duplicateNode(child.id)}
                     />
                   );
-                }
-
-                // Render a QueryRule
-                return (
-                  <QueryRule
-                    key={child.id}
-                    rule={child as QueryRuleType}
-                    depth={depth}
-                    fields={fields}
-                    validationErrors={validationErrors}
-                    onUpdate={(updates) =>
-                      updateRule(child.id, updates)
-                    }
-                    onDelete={() => removeNode(child.id)}
-                    onDuplicate={() => duplicateNode(child.id)}
-                  />
-                );
-              })
+                })}
+              </SortableContext>
             )}
           </div>
         )}
