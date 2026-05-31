@@ -17,11 +17,11 @@ export function generateMongoDB(root: QueryGroup): string {
   return JSON.stringify(
     filter,
     (key, value) => {
-      if (value instanceof RegExp) return `__REGEX_START__/${value.source}/${value.flags}__REGEX_END__`;
+      if (value instanceof RegExp) return { $regex: value.source, $options: value.flags };
       return value;
     },
     2
-  ).replace(/"__REGEX_START__\/(.*?)\/([a-z]*)__REGEX_END__"/g, "/$1/$2");
+  );
 }
 
 /**
@@ -139,8 +139,8 @@ function formatMongoCondition(
       const gte = typedValue(value[0]);
       const lte = typedValue(value[1]);
       if (
-        gte === "" || gte === null || Number.isNaN(gte as number) ||
-        lte === "" || lte === null || Number.isNaN(lte as number)
+        gte === "" || gte === null || Number.isNaN(Number(gte)) ||
+        lte === "" || lte === null || Number.isNaN(Number(lte))
       ) {
         return null;
       }

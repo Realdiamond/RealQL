@@ -75,7 +75,7 @@ export function ArrayValueInput({
             <button
               type="button"
               onClick={() => removeItem(item)}
-              className="hover:text-[var(--error)] transition-colors"
+              className="hover:text-[var(--color-error)] transition-colors"
               aria-label={`Remove ${item}`}
             >
               <X className="h-3 w-3" />

@@ -27,9 +27,9 @@ export function ValidationMessage({ errors }: ValidationMessageProps) {
           className={cn(
             "flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium",
             error.severity === "error" &&
-              "text-[var(--error)] bg-[var(--error)]/10",
+              "text-[var(--color-error)] bg-[var(--color-error)]/10",
             error.severity === "warning" &&
-              "text-[var(--warning)] bg-[var(--warning)]/10"
+              "text-[var(--color-warning)] bg-[var(--color-warning)]/10"
           )}
           role="alert"
         >

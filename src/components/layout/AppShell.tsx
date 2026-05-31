@@ -3,6 +3,8 @@
 import { type ReactNode } from "react";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { KeyboardShortcutsDialog } from "./KeyboardShortcutsDialog";
+import { HistorySidebar } from "@/components/query-history/HistorySidebar";
+import { SavePresetDialog } from "@/components/query-history/SavePresetDialog";
 
 interface AppShellProps {
   children: ReactNode;
@@ -18,6 +20,8 @@ export function AppShell({ children }: AppShellProps) {
         {children}
       </div>
       <KeyboardShortcutsDialog />
+      <SavePresetDialog />
+      <HistorySidebar />
     </>
   );
 }

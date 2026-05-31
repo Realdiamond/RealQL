@@ -39,6 +39,11 @@ export function EnumValueInput({
       <option value="" disabled>
         Select value…
       </option>
+      {value && !enumValues.includes(value) && (
+        <option value={value} disabled className="text-[var(--color-error)]">
+          Invalid value: {value}
+        </option>
+      )}
       {enumValues.map((v) => (
         <option key={v} value={v}>
           {v}

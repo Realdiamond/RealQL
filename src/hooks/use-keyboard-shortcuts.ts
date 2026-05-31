@@ -6,7 +6,7 @@ import { useQueryStore } from "@/lib/store/query-store";
 import { useUIStore } from "@/lib/store/ui-store";
 
 export function useKeyboardShortcuts() {
-  const { theme, setTheme, systemTheme } = useTheme();
+  const { theme, setTheme, systemTheme, resolvedTheme } = useTheme();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,10 +46,11 @@ export function useKeyboardShortcuts() {
           }
           break;
 
-        case "s":
+        case "s": {
           e.preventDefault();
-          window.dispatchEvent(new CustomEvent("save-preset"));
+          useUIStore.getState().setSavePresetDialogOpen(true);
           break;
+        }
 
         case "e":
           e.preventDefault();
@@ -58,7 +59,7 @@ export function useKeyboardShortcuts() {
 
         case "d": {
           e.preventDefault();
-          const currentTheme = theme === "system" ? systemTheme : theme;
+          const currentTheme = resolvedTheme || (theme === "system" ? systemTheme : theme) || "light";
           setTheme(currentTheme === "dark" ? "light" : "dark");
           break;
         }
@@ -88,5 +89,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [theme, systemTheme, setTheme]);
+  }, [theme, systemTheme, resolvedTheme, setTheme]);
 }

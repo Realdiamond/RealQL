@@ -86,6 +86,14 @@ export function QueryBuilder() {
     if (!targetParent) return;
 
     const activeParent = findParent(rootGroup, activeNodeId);
+    const activeNodeData = findNode(rootGroup, activeNodeId);
+
+    if (activeNodeData && activeNodeData.type === "group") {
+      if (activeNodeData.id === targetParent.id || !!findNode(activeNodeData as import("@/lib/types").QueryGroup, targetParent.id)) {
+        return;
+      }
+    }
+
     const overNodeIndex = targetParent.children.findIndex((c) => c.id === overNodeId);
 
     let newIndex = overNodeIndex;
