@@ -133,8 +133,8 @@ export function GroupToolbar({
             className={cn(
               "inline-flex items-center justify-center",
               "h-7 w-7 rounded-md",
-              "text-[var(--gray-400)] hover:text-[var(--color-error)]",
-              "hover:bg-[var(--color-error)]/10",
+              "text-[var(--gray-400)] hover:text-[var(--error)]",
+              "hover:bg-[var(--error)]/10",
               "transition-colors duration-150"
             )}
             aria-label="Delete group"

@@ -117,7 +117,7 @@ describe("SQL Generator", () => {
   it("should generate REGEXP", () => {
     const group = makeGroup([makeRule({ operator: "regex", value: "^[A-Z]" })]);
     const where = generateSQLWhere(group);
-    expect(where).toBe("\"name\" REGEXP '^[A-Z]'");
+    expect(where).toBe("\"name\" ~ '^[A-Z]'");
   });
 
   // --- Combinators ---

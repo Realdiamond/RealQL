@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useQueryStore } from "@/lib/store/query-store";
 import { useShallow } from "zustand/react/shallow";
 import { getSchemaData } from "@/lib/schemas/registry";
@@ -44,6 +44,13 @@ export function QueryResultsPanel() {
 
   // Track the latest execution to discard stale responses
   const executionIdRef = useRef(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const handleExecute = useCallback(() => {
     const thisExecution = ++executionIdRef.current;
@@ -53,8 +60,10 @@ export function QueryResultsPanel() {
     setSort(null);
     setCurrentPage(1);
 
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
     // Simulate network/DB latency for realism
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       // Discard if a newer execution started
       if (thisExecution !== executionIdRef.current) return;
 
@@ -70,6 +79,13 @@ export function QueryResultsPanel() {
     setPageSize(size);
     setCurrentPage(1);
   }, []);
+
+  // Listen for global execute shortcut
+  useEffect(() => {
+    const onExecuteShortcut = () => handleExecute();
+    window.addEventListener("execute-query", onExecuteShortcut);
+    return () => window.removeEventListener("execute-query", onExecuteShortcut);
+  }, [handleExecute]);
 
   // Compute pagination
   const pagination: PaginationState = {

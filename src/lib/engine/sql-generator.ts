@@ -134,8 +134,8 @@ function formatSQLCondition(
     }
 
     case "regex":
-      // SQL standard uses SIMILAR TO; MySQL uses REGEXP
-      return `${field} REGEXP ${escapeValue(value)}`;
+      // Normalize to PostgreSQL syntax (~ operator)
+      return `${field} ~ ${escapeValue(value)}`;
 
     default:
       return null;

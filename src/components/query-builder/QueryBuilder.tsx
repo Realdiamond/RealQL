@@ -95,7 +95,7 @@ export function QueryBuilder() {
     if (activeParent?.id === targetParent.id) {
       const oldIndex = activeParent.children.findIndex((c) => c.id === activeNodeId);
       if (oldIndex < overNodeIndex) {
-        newIndex = overNodeIndex;
+        newIndex = Math.max(0, overNodeIndex - 1);
       }
     }
 

@@ -48,7 +48,7 @@ export function ResultsLoadingState({
                 "animate-pulse",
                 colIdx === 0 ? "w-28" : "flex-1"
               )}
-              style={{ animationDelay: `${(rowIdx * columnCount + colIdx) * 50}ms` }}
+              style={{ animationDelay: `${((rowIdx * columnCount + colIdx) % 20) * 50}ms` }}
             />
           ))}
         </div>

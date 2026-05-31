@@ -10,6 +10,7 @@
 
 "use client";
 
+import type { ReactNode } from "react";
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { SortState } from "@/lib/types";
@@ -47,7 +48,7 @@ export function sortRows(data: Row[], sort: SortState | null): Row[] {
 export function ResultsTable({ data, sort, onSortChange }: ResultsTableProps) {
   if (data.length === 0) return null;
 
-  const columns = Object.keys(data[0]);
+  const columns = Array.from(new Set(data.flatMap((row) => Object.keys(row))));
 
   function handleSort(column: string) {
     if (sort?.column !== column) {
@@ -133,7 +134,7 @@ export function ResultsTable({ data, sort, onSortChange }: ResultsTableProps) {
 }
 
 /** Format a cell value for display */
-function formatCellValue(value: unknown): React.ReactNode {
+function formatCellValue(value: unknown): ReactNode {
   if (value === null || value === undefined) {
     return (
       <span className="text-[var(--gray-400)] italic">null</span>

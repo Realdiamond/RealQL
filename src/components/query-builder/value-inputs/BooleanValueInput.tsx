@@ -19,7 +19,12 @@ export function BooleanValueInput({
   disabled,
   onChange,
 }: BooleanValueInputProps) {
-  const stringValue = value === true ? "true" : value === false ? "false" : "";
+  const stringValue =
+    value === true || String(value).toLowerCase() === "true"
+      ? "true"
+      : value === false || String(value).toLowerCase() === "false"
+      ? "false"
+      : "";
 
   return (
     <select
