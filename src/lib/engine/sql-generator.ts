@@ -93,16 +93,16 @@ function formatSQLCondition(
       return `${field} != ${escapeValue(value)}`;
 
     case "contains":
-      return `${field} LIKE ${escapeValue(`%${value}%`)}`;
+      return `${field} LIKE ${escapeValue(`%${escapeLike(value)}%`)} ESCAPE '\\'`;
 
     case "not_contains":
-      return `${field} NOT LIKE ${escapeValue(`%${value}%`)}`;
+      return `${field} NOT LIKE ${escapeValue(`%${escapeLike(value)}%`)} ESCAPE '\\'`;
 
     case "starts_with":
-      return `${field} LIKE ${escapeValue(`${value}%`)}`;
+      return `${field} LIKE ${escapeValue(`${escapeLike(value)}%`)} ESCAPE '\\'`;
 
     case "ends_with":
-      return `${field} LIKE ${escapeValue(`%${value}`)}`;
+      return `${field} LIKE ${escapeValue(`%${escapeLike(value)}`)} ESCAPE '\\'`;
 
     case "greater_than":
       return `${field} > ${escapeValue(value)}`;
@@ -166,4 +166,14 @@ function escapeValue(value: unknown): string {
   // String — escape single quotes by doubling them
   const str = String(value).replace(/'/g, "''");
   return `'${str}'`;
+}
+
+/**
+ * Escape special characters for SQL LIKE clauses.
+ */
+function escapeLike(value: unknown): string {
+  return String(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/%/g, "\\%")
+    .replace(/_/g, "\\_");
 }

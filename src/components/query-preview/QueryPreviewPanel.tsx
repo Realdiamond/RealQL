@@ -13,6 +13,7 @@ import { useState, useMemo } from "react";
 import { Code2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useQueryStore } from "@/lib/store/query-store";
+import { useShallow } from "zustand/react/shallow";
 import { getSchema } from "@/lib/schemas/registry";
 import { generateQuery } from "@/lib/engine/query-generator";
 import { PreviewFormatTabs } from "./PreviewFormatTabs";
@@ -20,7 +21,12 @@ import { CodeBlock } from "./CodeBlock";
 import type { QueryOutputFormat } from "@/lib/types";
 
 export function QueryPreviewPanel() {
-  const { rootGroup, activeSchemaId } = useQueryStore();
+  const { rootGroup, activeSchemaId } = useQueryStore(
+    useShallow((state) => ({
+      rootGroup: state.rootGroup,
+      activeSchemaId: state.activeSchemaId,
+    }))
+  );
   const [activeFormat, setActiveFormat] = useState<QueryOutputFormat>("sql");
 
   // Generate query output whenever tree or format changes
@@ -66,6 +72,8 @@ export function QueryPreviewPanel() {
         {/* Validation status bar */}
         {(errorCount > 0 || warningCount > 0) && (
           <div
+            aria-live="polite"
+            aria-atomic="true"
             className={cn(
               "flex items-center gap-2 mt-3 px-3 py-2 rounded-md text-xs",
               errorCount > 0

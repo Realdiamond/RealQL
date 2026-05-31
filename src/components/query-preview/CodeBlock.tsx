@@ -66,7 +66,7 @@ export function CodeBlock({ code, format }: CodeBlockProps) {
           "px-2 py-1 rounded-md text-xs font-medium",
           "bg-[var(--surface)] border border-[var(--border)]",
           "text-[var(--gray-400)] hover:text-[var(--foreground)]",
-          "opacity-0 group-hover:opacity-100",
+          "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100",
           "transition-all duration-150",
           copied && "opacity-100 text-[var(--success)]"
         )}
@@ -109,7 +109,9 @@ function highlightCode(code: string, format: QueryOutputFormat): string {
   const escaped = code
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
   switch (format) {
     case "sql":

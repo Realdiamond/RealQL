@@ -32,15 +32,14 @@ export function PreviewFormatTabs({
         "p-0.5 rounded-lg",
         "bg-[var(--surface-secondary)]"
       )}
-      role="tablist"
+      role="group"
       aria-label="Query output format"
     >
       {FORMATS.map(({ value, label }) => (
         <button
           key={value}
           type="button"
-          role="tab"
-          aria-selected={activeFormat === value}
+          aria-pressed={activeFormat === value}
           onClick={() => onChange(value)}
           className={cn(
             "px-3 py-1.5 rounded-md text-xs font-medium",

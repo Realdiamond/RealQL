@@ -153,7 +153,12 @@ export function validateRule(
           });
         }
       } else if (operatorMeta?.valueCount === "array" && Array.isArray(rule.value)) {
-        if (rule.value.some(v => v !== "" && v !== null && v !== undefined && Number.isNaN(Number(v)))) {
+        if (rule.value.some(v => {
+          if (v === null || v === undefined) return false;
+          const s = String(v).trim();
+          if (s === "") return true; // Treat empty/whitespace strings as invalid numbers
+          return Number.isNaN(Number(s));
+        })) {
           errors.push({
             nodeId: rule.id,
             field: "value",

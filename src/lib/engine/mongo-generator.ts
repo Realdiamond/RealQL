@@ -94,10 +94,10 @@ function formatMongoCondition(
       return { [field]: { $ne: typedValue(value) } };
 
     case "contains":
-      return { [field]: { $regex: String(value), $options: "i" } };
+      return { [field]: { $regex: escapeRegex(String(value)), $options: "i" } };
 
     case "not_contains":
-      return { [field]: { $not: { $regex: String(value), $options: "i" } } };
+      return { [field]: { $not: { $regex: escapeRegex(String(value)), $options: "i" } } };
 
     case "starts_with":
       return { [field]: { $regex: `^${escapeRegex(String(value))}`, $options: "i" } };
@@ -129,10 +129,18 @@ function formatMongoCondition(
 
     case "between": {
       if (!Array.isArray(value) || value.length !== 2) return null;
+      const gte = typedValue(value[0]);
+      const lte = typedValue(value[1]);
+      if (
+        gte === "" || gte === null || Number.isNaN(gte as number) ||
+        lte === "" || lte === null || Number.isNaN(lte as number)
+      ) {
+        return null;
+      }
       return {
         [field]: {
-          $gte: typedValue(value[0]),
-          $lte: typedValue(value[1]),
+          $gte: gte,
+          $lte: lte,
         },
       };
     }

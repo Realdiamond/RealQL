@@ -157,11 +157,6 @@ function formatGraphQLCondition(
 function formatGQLValue(value: unknown): string {
   if (typeof value === "number") return String(value);
   if (typeof value === "boolean") return value ? "true" : "false";
-  // Try numeric coercion for string values
-  if (typeof value === "string") {
-    const num = Number(value);
-    if (!Number.isNaN(num) && value.trim() !== "") return String(num);
-  }
   // String — use JSON.stringify for proper escaping
   return JSON.stringify(String(value));
 }
