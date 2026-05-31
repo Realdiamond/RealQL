@@ -48,8 +48,8 @@ export function GroupToolbar({
           ref={dragHandleRef}
           {...dragHandleProps}
           className={cn(
-            "flex items-center text-[var(--gray-300)] cursor-grab outline-none",
-            dragHandleProps && "hover:text-[var(--foreground)] active:cursor-grabbing"
+            "flex items-center text-[var(--gray-300)] focus-ring rounded-sm",
+            dragHandleProps && "cursor-grab hover:text-[var(--foreground)] active:cursor-grabbing"
           )}
         >
           <GripVertical className="h-4 w-4" />

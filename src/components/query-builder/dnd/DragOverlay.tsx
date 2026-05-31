@@ -65,7 +65,7 @@ function DragGhost({ node }: { node: QueryNode }) {
                 {node.value !== null && node.value !== undefined && node.value !== "" && (
                   <>
                     {" "}
-                    <span className="font-mono text-[var(--accent-600)] dark:text-[var(--accent-400)]">
+                    <span className="font-mono text-[var(--accent-600)]">
                       {Array.isArray(node.value)
                         ? `[${node.value.join(", ")}]`
                         : String(node.value)}
