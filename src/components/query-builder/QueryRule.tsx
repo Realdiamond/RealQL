@@ -18,13 +18,16 @@ import { RuleActions } from "./RuleActions";
 import { FieldSelector } from "./fields/FieldSelector";
 import { OperatorSelector } from "./operators/OperatorSelector";
 import { ValueInputRouter } from "./value-inputs/ValueInputRouter";
-import type { QueryRule as QueryRuleType, SchemaField, FieldType, RuleValue } from "@/lib/types";
+import type { QueryRule as QueryRuleType, SchemaField, FieldType, RuleValue, ValidationError } from "@/lib/types";
 import { getOperatorsForFieldType } from "@/lib/constants/operators";
+import { getErrorsForNode } from "@/lib/engine/query-validator";
+import { ValidationMessage } from "./ValidationMessage";
 
 interface QueryRuleProps {
   rule: QueryRuleType;
   depth: number;
   fields: SchemaField[];
+  validationErrors?: ValidationError[];
   onUpdate: (updates: Partial<QueryRuleType>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
@@ -33,6 +36,7 @@ interface QueryRuleProps {
 export function QueryRule({
   rule,
   fields,
+  validationErrors = [],
   onUpdate,
   onDelete,
   onDuplicate,
@@ -40,6 +44,10 @@ export function QueryRule({
   // Resolve field metadata from the schema
   const activeField = fields.find((f) => f.name === rule.field);
   const fieldType: FieldType | null = activeField?.type ?? null;
+
+  // Get validation errors for this specific rule
+  const ruleErrors = getErrorsForNode(validationErrors, rule.id);
+  const hasErrors = ruleErrors.some((e) => e.severity === "error");
 
   const handleFieldChange = (fieldName: string, newFieldType: FieldType) => {
     // Reset operator to first compatible operator for the new field type
@@ -49,7 +57,6 @@ export function QueryRule({
     // Reset value based on field type
     let defaultValue: RuleValue = "";
     if (newFieldType === "boolean") defaultValue = true;
-    if (newFieldType === "number") defaultValue = "";
 
     onUpdate({
       field: fieldName,
@@ -61,14 +68,17 @@ export function QueryRule({
   return (
     <div
       className={cn(
-        "group/rule flex items-center gap-2 px-3 py-2 rounded-lg",
+        "group/rule flex flex-col gap-0 rounded-lg",
         "bg-[var(--surface)] hover:bg-[var(--surface-secondary)]",
-        "border border-[var(--border)]",
-        "transition-colors duration-150",
+        "border transition-colors duration-150",
+        hasErrors
+          ? "border-[var(--error)]/50"
+          : "border-[var(--border)]",
         rule.disabled && "opacity-50"
       )}
       data-rule-id={rule.id}
     >
+      <div className="flex items-center gap-2 px-3 py-2">
       {/* Drag handle (visual only — wired in PR 9) */}
       <div className="flex items-center text-[var(--gray-300)] cursor-grab">
         <GripVertical className="h-4 w-4" />
@@ -90,7 +100,6 @@ export function QueryRule({
         onChange={(operator) => {
           let defaultValue: RuleValue = "";
           if (fieldType === "boolean") defaultValue = true;
-          if (fieldType === "number") defaultValue = "";
           onUpdate({ operator, value: defaultValue });
         }}
       />
@@ -112,6 +121,14 @@ export function QueryRule({
         onDuplicate={onDuplicate}
         onToggleDisable={() => onUpdate({ disabled: !rule.disabled })}
       />
+      </div>
+
+      {/* Validation errors */}
+      {ruleErrors.length > 0 && (
+        <div className="px-3 pb-2">
+          <ValidationMessage errors={ruleErrors} />
+        </div>
+      )}
     </div>
   );
 }

@@ -30,19 +30,21 @@ export function OperatorSelector({
     ? getOperatorsForFieldType(fieldType)
     : OPERATORS;
 
-  const selectedValue = availableOperators.find((o) => o.type === value)?.type ?? availableOperators[0].type;
+  const selectedValue = availableOperators.find((o) => o.type === value)?.type ?? availableOperators[0]?.type ?? null;
 
   useEffect(() => {
-    if (value !== selectedValue) {
+    if (selectedValue && value !== selectedValue) {
       onChange(selectedValue);
     }
   }, [value, selectedValue, onChange]);
 
   return (
     <select
-      value={selectedValue}
-      onChange={(e) => onChange(e.target.value as OperatorType)}
-      disabled={disabled}
+      value={selectedValue ?? ""}
+      onChange={(e) => {
+        if (e.target.value) onChange(e.target.value as OperatorType);
+      }}
+      disabled={disabled || !selectedValue}
       className={cn(
         "h-8 px-2 rounded-md text-sm",
         "bg-[var(--surface)] border border-[var(--border)]",

@@ -19,12 +19,14 @@ export function BooleanValueInput({
   disabled,
   onChange,
 }: BooleanValueInputProps) {
-  const stringValue = typeof value === "boolean" ? String(value) : value;
+  const stringValue = value === true ? "true" : value === false ? "false" : "";
 
   return (
     <select
       value={stringValue}
-      onChange={(e) => onChange(e.target.value === "true")}
+      onChange={(e) => {
+        if (e.target.value) onChange(e.target.value === "true");
+      }}
       disabled={disabled}
       className={cn(
         "h-8 px-2 rounded-md text-sm",
@@ -35,6 +37,9 @@ export function BooleanValueInput({
       )}
       aria-label="Boolean value"
     >
+      <option value="" disabled hidden>
+        Select...
+      </option>
       <option value="true">True</option>
       <option value="false">False</option>
     </select>
