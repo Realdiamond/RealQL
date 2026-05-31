@@ -16,7 +16,6 @@ interface GroupToolbarProps {
   combinator: "AND" | "OR";
   collapsed: boolean;
   isRoot: boolean;
-  depth: number;
   childCount: number;
   onToggleCombinator: () => void;
   onToggleCollapse: () => void;
@@ -29,7 +28,6 @@ export function GroupToolbar({
   combinator,
   collapsed,
   isRoot,
-  depth,
   childCount,
   onToggleCombinator,
   onToggleCollapse,

@@ -62,7 +62,6 @@ export function QueryGroup({
           combinator={group.combinator}
           collapsed={group.collapsed}
           isRoot={isRoot}
-          depth={depth}
           childCount={totalRules}
           onToggleCombinator={() => toggleCombinator(group.id)}
           onToggleCollapse={() => toggleCollapse(group.id)}

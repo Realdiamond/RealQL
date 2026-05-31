@@ -14,6 +14,13 @@ import { SCHEMAS } from "@/lib/schemas/registry";
 import type { SchemaId } from "@/lib/schemas/registry";
 import { cn } from "@/lib/utils/cn";
 import { Database, RotateCcw, Undo2, Redo2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function QueryBuilder() {
   const {
@@ -45,23 +52,33 @@ export function QueryBuilder() {
               Data Source
             </span>
           </div>
-          <select
+          <Select
             value={activeSchemaId}
-            onChange={(e) => setSchema(e.target.value as SchemaId)}
-            className={cn(
-              "h-8 px-3 rounded-md text-sm font-medium",
-              "bg-[var(--surface)] border border-[var(--border)]",
-              "text-[var(--foreground)]",
-              "focus-ring"
-            )}
-            aria-label="Select data source"
+            onValueChange={(val) => setSchema(val as SchemaId)}
           >
-            {SCHEMAS.map((schema) => (
-              <option key={schema.id} value={schema.id}>
-                {schema.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger
+              className={cn(
+                "h-8 w-auto px-3 text-sm font-medium",
+                "bg-[var(--surface)] border border-[var(--border)]",
+                "text-[var(--foreground)]"
+              )}
+              aria-label="Select data source"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              side="bottom"
+              align="start"
+              sideOffset={4}
+              alignItemWithTrigger={false}
+            >
+              {SCHEMAS.map((schema) => (
+                <SelectItem key={schema.id} value={schema.id}>
+                  {schema.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Global actions */}
