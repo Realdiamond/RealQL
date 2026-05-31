@@ -7,7 +7,8 @@
  * collapse toggle, and delete button.
  */
 
-import { Plus, FolderPlus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, FolderPlus, Trash2, ChevronDown, ChevronRight, GripVertical } from "lucide-react";
+import type React from "react";
 import { cn } from "@/lib/utils/cn";
 import { CombinatorToggle } from "./CombinatorToggle";
 
@@ -22,6 +23,8 @@ interface GroupToolbarProps {
   onAddRule: () => void;
   onAddGroup: () => void;
   onDelete: () => void;
+  dragHandleRef?: (element: HTMLElement | null) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
 export function GroupToolbar({
@@ -34,9 +37,25 @@ export function GroupToolbar({
   onAddRule,
   onAddGroup,
   onDelete,
+  dragHandleRef,
+  dragHandleProps,
 }: GroupToolbarProps) {
   return (
     <div className="flex items-center gap-2 py-2 px-3">
+      {/* Drag handle (not for root) */}
+      {!isRoot && (
+        <div
+          ref={dragHandleRef}
+          {...dragHandleProps}
+          className={cn(
+            "flex items-center text-[var(--gray-300)] cursor-grab outline-none",
+            dragHandleProps && "hover:text-[var(--foreground)] active:cursor-grabbing"
+          )}
+        >
+          <GripVertical className="h-4 w-4" />
+        </div>
+      )}
+
       {/* Collapse toggle */}
       <button
         type="button"

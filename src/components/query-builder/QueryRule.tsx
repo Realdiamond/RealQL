@@ -22,6 +22,7 @@ import type { QueryRule as QueryRuleType, SchemaField, FieldType, RuleValue, Val
 import { getOperatorsForFieldType } from "@/lib/constants/operators";
 import { getErrorsForNode } from "@/lib/engine/query-validator";
 import { ValidationMessage } from "./ValidationMessage";
+import type React from "react";
 
 interface QueryRuleProps {
   rule: QueryRuleType;
@@ -31,6 +32,8 @@ interface QueryRuleProps {
   onUpdate: (updates: Partial<QueryRuleType>) => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  dragHandleRef?: (element: HTMLElement | null) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
 export function QueryRule({
@@ -40,6 +43,8 @@ export function QueryRule({
   onUpdate,
   onDelete,
   onDuplicate,
+  dragHandleRef,
+  dragHandleProps,
 }: QueryRuleProps) {
   // Resolve field metadata from the schema
   const activeField = fields.find((f) => f.name === rule.field);
@@ -80,7 +85,14 @@ export function QueryRule({
     >
       <div className="flex items-center gap-2 px-3 py-2">
       {/* Drag handle (visual only — wired in PR 9) */}
-      <div className="flex items-center text-[var(--gray-300)] cursor-grab">
+      <div 
+        ref={dragHandleRef}
+        {...dragHandleProps}
+        className={cn(
+          "flex items-center text-[var(--gray-300)] cursor-grab outline-none",
+          dragHandleProps && "hover:text-[var(--foreground)] active:cursor-grabbing"
+        )}
+      >
         <GripVertical className="h-4 w-4" />
       </div>
 

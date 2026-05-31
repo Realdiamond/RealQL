@@ -14,6 +14,21 @@ import { SCHEMAS, type SchemaId, getSchema } from "@/lib/schemas/registry";
 import { cn } from "@/lib/utils/cn";
 import { Database, RotateCcw, Undo2, Redo2 } from "lucide-react";
 import { useQueryValidation } from "@/hooks/use-query-validation";
+import { useState } from "react";
+import {
+  DndContext,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { QueryDragOverlay } from "./dnd/DragOverlay";
+import type { QueryNode } from "@/lib/types";
+import { findNode, findParent } from "@/lib/engine/tree-utils";
 import {
   Select,
   SelectContent,
@@ -32,6 +47,7 @@ export function QueryBuilder() {
     redo,
     undoStack,
     redoStack,
+    moveNode,
   } = useQueryStore();
 
   // Resolve active schema fields for validation
@@ -40,6 +56,51 @@ export function QueryBuilder() {
 
   // Run debounced validation against the full query tree
   const validationErrors = useQueryValidation(rootGroup, fields);
+
+  const [activeNode, setActiveNode] = useState<QueryNode | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 }, // 5px movement required
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const node = findNode(rootGroup, event.active.id as string);
+    if (node) setActiveNode(node);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveNode(null);
+
+    if (!over || active.id === over.id) return;
+
+    const activeNodeId = active.id as string;
+    const overNodeId = over.id as string;
+
+    const targetParent = findParent(rootGroup, overNodeId);
+    if (!targetParent) return;
+
+    const activeParent = findParent(rootGroup, activeNodeId);
+    const overNodeIndex = targetParent.children.findIndex((c) => c.id === overNodeId);
+
+    let newIndex = overNodeIndex;
+    
+    // If moving within the same group and moving left to right, 
+    // the target index is shifted because the item is removed first.
+    if (activeParent?.id === targetParent.id) {
+      const oldIndex = activeParent.children.findIndex((c) => c.id === activeNodeId);
+      if (oldIndex < overNodeIndex) {
+        newIndex = overNodeIndex;
+      }
+    }
+
+    moveNode(activeNodeId, targetParent.id, newIndex);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -153,7 +214,15 @@ export function QueryBuilder() {
 
       {/* Query tree */}
       <div className="flex-1 overflow-y-auto p-4">
-        <QueryGroup group={rootGroup} depth={0} isRoot validationErrors={validationErrors} />
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <QueryGroup group={rootGroup} depth={0} isRoot validationErrors={validationErrors} />
+          <QueryDragOverlay activeNode={activeNode} />
+        </DndContext>
       </div>
     </div>
   );
