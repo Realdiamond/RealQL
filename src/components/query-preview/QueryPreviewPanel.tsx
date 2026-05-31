@@ -70,37 +70,45 @@ export function QueryPreviewPanel() {
         <CodeBlock code={output.query} format={activeFormat} />
 
         {/* Validation status bar */}
-        {(errorCount > 0 || warningCount > 0) && (
-          <div
-            aria-live="polite"
-            aria-atomic="true"
-            className={cn(
-              "flex items-center gap-2 mt-3 px-3 py-2 rounded-md text-xs",
-              errorCount > 0
-                ? "bg-[var(--error)]/10 text-[var(--error)]"
-                : "bg-[var(--warning)]/10 text-[var(--warning)]"
-            )}
-          >
-            <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <span>
-              {errorCount > 0 && (
-                <>
-                  {errorCount} error{errorCount !== 1 ? "s" : ""}
-                </>
-              )}
-              {errorCount > 0 && warningCount > 0 && ", "}
-              {warningCount > 0 && (
-                <>
-                  {warningCount} warning{warningCount !== 1 ? "s" : ""}
-                </>
-              )}
-              {" — "}
-              {errorCount > 0
-                ? "fix errors before executing"
-                : "review warnings"}
-            </span>
-          </div>
-        )}
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          className={cn(
+            errorCount > 0 || warningCount > 0
+              ? "flex items-center gap-2 mt-3 px-3 py-2 rounded-md text-xs"
+              : "sr-only",
+            errorCount > 0
+              ? "bg-[color:var(--color-error)]/10 text-[var(--color-error)]"
+              : warningCount > 0
+                ? "bg-[color:var(--color-warning)]/10 text-[var(--color-warning)]"
+                : ""
+          )}
+        >
+          {errorCount > 0 || warningCount > 0 ? (
+            <>
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>
+                {errorCount > 0 && (
+                  <>
+                    {errorCount} error{errorCount !== 1 ? "s" : ""}
+                  </>
+                )}
+                {errorCount > 0 && warningCount > 0 && ", "}
+                {warningCount > 0 && (
+                  <>
+                    {warningCount} warning{warningCount !== 1 ? "s" : ""}
+                  </>
+                )}
+                {" — "}
+                {errorCount > 0
+                  ? "fix errors before executing"
+                  : "review warnings"}
+              </span>
+            </>
+          ) : (
+            "No errors or warnings"
+          )}
+        </div>
       </div>
     </div>
   );

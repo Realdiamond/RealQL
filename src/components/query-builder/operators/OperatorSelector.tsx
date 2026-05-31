@@ -36,7 +36,8 @@ export function OperatorSelector({
     if (selectedValue && value !== selectedValue) {
       onChange(selectedValue);
     }
-  }, [value, selectedValue, onChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, selectedValue]);
 
   return (
     <select

@@ -65,7 +65,7 @@ export function QueryGroup({
           "rounded-lg",
           depth > 0 && "bg-[var(--surface-secondary)]/30",
           isRoot && "bg-transparent",
-          hasErrors && "ring-1 ring-[var(--error)]/30"
+          hasErrors && "ring-1 ring-[var(--color-error)]/30"
         )}
         data-group-id={group.id}
         data-depth={depth}
@@ -120,14 +120,14 @@ export function QueryGroup({
                 );
               })
             )}
+          </div>
+        )}
 
-          {/* Group-level validation messages */}
-          {groupErrors.length > 0 && (
-            <div className="px-3 pb-2">
-              <ValidationMessage errors={groupErrors} />
-            </div>
-          )}
-        </div>
+        {/* Group-level validation messages */}
+        {groupErrors.length > 0 && (
+          <div className="px-3 pb-2 pt-1">
+            <ValidationMessage errors={groupErrors} />
+          </div>
         )}
       </div>
     </NestingIndicator>

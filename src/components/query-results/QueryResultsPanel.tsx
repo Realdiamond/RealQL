@@ -18,7 +18,7 @@ import { executeQuery } from "@/lib/engine/query-executor";
 import type { ExecutionResult, PaginationState, SortState } from "@/lib/types";
 import type { SchemaId } from "@/lib/schemas/registry";
 import { ResultsToolbar } from "./ResultsToolbar";
-import { ResultsTable } from "./ResultsTable";
+import { ResultsTable, sortRows } from "./ResultsTable";
 import { ResultsPagination } from "./ResultsPagination";
 import { ResultsLoadingState } from "./ResultsLoadingState";
 import { ResultsEmptyState } from "./ResultsEmptyState";
@@ -78,9 +78,10 @@ export function QueryResultsPanel() {
     totalPages: result ? Math.max(1, Math.ceil(result.matchedCount / pageSize)) : 1,
   };
 
-  // Slice data for current page
+  // Sort full dataset, then slice for current page
+  const sortedData = result ? sortRows(result.data, sort) : [];
   const startIdx = (currentPage - 1) * pageSize;
-  const pageData = result ? result.data.slice(startIdx, startIdx + pageSize) : [];
+  const pageData = sortedData.slice(startIdx, startIdx + pageSize);
 
   return (
     <div className="flex flex-col h-full">

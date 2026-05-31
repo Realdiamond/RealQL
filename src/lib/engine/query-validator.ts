@@ -40,7 +40,7 @@ export function validateQuery(
   const errors: ValidationError[] = [];
 
   // Rule 10: Depth warning (non-blocking)
-  if (depth > MAX_RECOMMENDED_DEPTH) {
+  if (depth >= MAX_RECOMMENDED_DEPTH) {
     errors.push({
       nodeId: root.id,
       field: "depth",

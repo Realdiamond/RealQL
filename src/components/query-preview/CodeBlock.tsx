@@ -126,97 +126,41 @@ function highlightCode(code: string, format: QueryOutputFormat): string {
 }
 
 function highlightSQL(code: string): string {
-  let result = code;
+  const keywords = SQL_KEYWORDS.join("|");
+  const regex = new RegExp(`(&#39;.*?&#39;|'.*?')|(\\b(?:${keywords})\\b)|(\\b\\d+(?:\\.\\d+)?\\b)`, "gi");
 
-  // Highlight SQL keywords (case-insensitive, whole words)
-  for (const kw of SQL_KEYWORDS) {
-    const regex = new RegExp(`\\b(${kw})\\b`, "gi");
-    result = result.replace(
-      regex,
-      '<span style="color: var(--indigo-400); font-weight: 600;">$1</span>'
-    );
-  }
-
-  // Highlight string literals (single-quoted)
-  result = result.replace(
-    /&#39;([^&#]*?)&#39;|'([^']*?)'/g,
-    '<span style="color: var(--success);">\'$1$2\'</span>'
-  );
-
-  // Highlight numbers
-  result = result.replace(
-    /\b(\d+(?:\.\d+)?)\b/g,
-    '<span style="color: var(--warning);">$1</span>'
-  );
-
-  return result;
+  return code.replace(regex, (match, str, kw, num) => {
+    if (str) return `<span style="color: var(--success);">${str}</span>`;
+    if (kw) return `<span style="color: var(--indigo-400); font-weight: 600;">${kw}</span>`;
+    if (num) return `<span style="color: var(--warning);">${num}</span>`;
+    return match;
+  });
 }
 
 function highlightJSON(code: string): string {
-  let result = code;
+  // 1: MongoDB Operator Key, 2: Regular Key, 3: String Value, 4: Number, 5: Boolean/Null
+  const regex = /(&quot;\$\w+&quot;(?=\s*:))|(&quot;[^&]*?&quot;(?=\s*:))|(&quot;[^&]*?&quot;)|(\b\d+(?:\.\d+)?\b)|\b(true|false|null)\b/gi;
 
-  // Highlight JSON keys (MongoDB operators like $and, $or, $eq, etc.)
-  result = result.replace(
-    /&quot;(\$\w+)&quot;/g,
-    '&quot;<span style="color: var(--indigo-400); font-weight: 600;">$1</span>&quot;'
-  );
-
-  // Highlight regular JSON keys
-  result = result.replace(
-    /&quot;([^$&][^&]*?)&quot;(?=\s*:)/g,
-    '&quot;<span style="color: var(--foreground);">$1</span>&quot;'
-  );
-
-  // Highlight string values
-  result = result.replace(
-    /:\s*&quot;([^&]*?)&quot;/g,
-    ': &quot;<span style="color: var(--success);">$1</span>&quot;'
-  );
-
-  // Highlight numbers
-  result = result.replace(
-    /:\s*(\d+(?:\.\d+)?)/g,
-    ': <span style="color: var(--warning);">$1</span>'
-  );
-
-  // Highlight booleans and null
-  result = result.replace(
-    /\b(true|false|null)\b/g,
-    '<span style="color: var(--indigo-400);">$1</span>'
-  );
-
-  return result;
+  return code.replace(regex, (match, opKey, regKey, strVal, num, bool) => {
+    if (opKey) return `<span style="color: var(--indigo-400); font-weight: 600;">${opKey}</span>`;
+    if (regKey) return `<span style="color: var(--foreground);">${regKey}</span>`;
+    if (strVal) return `<span style="color: var(--success);">${strVal}</span>`;
+    if (num) return `<span style="color: var(--warning);">${num}</span>`;
+    if (bool) return `<span style="color: var(--indigo-400);">${bool}</span>`;
+    return match;
+  });
 }
 
 function highlightGraphQL(code: string): string {
-  let result = code;
+  const keywords = GRAPHQL_KEYWORDS.join("|");
+  // 1: String, 2: Keyword, 3: Hasura operator, 4: Number
+  const regex = new RegExp(`(&quot;[^&]*?&quot;)|(\\b(?:${keywords})\\b)|(\\b_\\w+\\b)|(\\b\\d+(?:\\.\\d+)?\\b)`, "gi");
 
-  // Highlight GraphQL keywords
-  for (const kw of GRAPHQL_KEYWORDS) {
-    const regex = new RegExp(`\\b(${kw})\\b`, "g");
-    result = result.replace(
-      regex,
-      '<span style="color: var(--indigo-400); font-weight: 600;">$1</span>'
-    );
-  }
-
-  // Highlight Hasura-style operators (_eq, _gt, _and, _or, etc.)
-  result = result.replace(
-    /\b(_\w+)\b/g,
-    '<span style="color: var(--warning);">$1</span>'
-  );
-
-  // Highlight string values
-  result = result.replace(
-    /&quot;([^&]*?)&quot;/g,
-    '&quot;<span style="color: var(--success);">$1</span>&quot;'
-  );
-
-  // Highlight numbers
-  result = result.replace(
-    /(?<=:\s)(\d+(?:\.\d+)?)\b/g,
-    '<span style="color: var(--warning);">$1</span>'
-  );
-
-  return result;
+  return code.replace(regex, (match, str, kw, op, num) => {
+    if (str) return `<span style="color: var(--success);">${str}</span>`;
+    if (kw) return `<span style="color: var(--indigo-400); font-weight: 600;">${kw}</span>`;
+    if (op) return `<span style="color: var(--warning);">${op}</span>`;
+    if (num) return `<span style="color: var(--warning);">${num}</span>`;
+    return match;
+  });
 }

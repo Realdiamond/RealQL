@@ -138,8 +138,8 @@ export function QueryBuilder() {
             className={cn(
               "inline-flex items-center gap-1.5",
               "px-2.5 py-1.5 rounded-md text-xs font-medium",
-              "text-[var(--gray-500)] hover:text-[var(--error)]",
-              "hover:bg-[var(--error)]/10",
+              "text-[var(--gray-500)] hover:text-[var(--color-error)]",
+              "hover:bg-[var(--color-error)]/10",
               "transition-colors duration-150"
             )}
             aria-label="Reset query"

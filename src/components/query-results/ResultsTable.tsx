@@ -22,6 +22,24 @@ interface ResultsTableProps {
   onSortChange: (sort: SortState | null) => void;
 }
 
+export function sortRows(data: Row[], sort: SortState | null): Row[] {
+  if (!sort) return data;
+  return [...data].sort((a, b) => {
+    const aVal = a[sort.column];
+    const bVal = b[sort.column];
+    const dir = sort.direction === "asc" ? 1 : -1;
+
+    if (aVal === null || aVal === undefined) return 1 * dir;
+    if (bVal === null || bVal === undefined) return -1 * dir;
+
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return (aVal - bVal) * dir;
+    }
+
+    return String(aVal).localeCompare(String(bVal)) * dir;
+  });
+}
+
 export function ResultsTable({ data, sort, onSortChange }: ResultsTableProps) {
   if (data.length === 0) return null;
 
@@ -37,24 +55,6 @@ export function ResultsTable({ data, sort, onSortChange }: ResultsTableProps) {
     }
   }
 
-  // Sort data locally
-  const sortedData = sort
-    ? [...data].sort((a, b) => {
-        const aVal = a[sort.column];
-        const bVal = b[sort.column];
-        const dir = sort.direction === "asc" ? 1 : -1;
-
-        if (aVal === null || aVal === undefined) return 1 * dir;
-        if (bVal === null || bVal === undefined) return -1 * dir;
-
-        if (typeof aVal === "number" && typeof bVal === "number") {
-          return (aVal - bVal) * dir;
-        }
-
-        return String(aVal).localeCompare(String(bVal)) * dir;
-      })
-    : data;
-
   return (
     <div className="overflow-auto flex-1">
       <table className="w-full text-xs">
@@ -64,14 +64,10 @@ export function ResultsTable({ data, sort, onSortChange }: ResultsTableProps) {
               <th
                 key={col}
                 className={cn(
-                  "px-3 py-2.5 text-left font-semibold text-[var(--gray-600)] dark:text-[var(--gray-400)]",
+                  "p-0 text-left font-semibold text-[var(--gray-600)] dark:text-[var(--gray-400)]",
                   "border-b border-[var(--border)]",
-                  "cursor-pointer select-none",
-                  "hover:text-[var(--foreground)] hover:bg-[var(--gray-100)] dark:hover:bg-[var(--gray-800)]",
-                  "transition-colors duration-100",
                   "whitespace-nowrap"
                 )}
-                onClick={() => handleSort(col)}
                 aria-sort={
                   sort?.column === col
                     ? sort.direction === "asc"
@@ -80,7 +76,16 @@ export function ResultsTable({ data, sort, onSortChange }: ResultsTableProps) {
                     : "none"
                 }
               >
-                <span className="inline-flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleSort(col)}
+                  className={cn(
+                    "flex items-center gap-1 w-full px-3 py-2.5",
+                    "hover:text-[var(--foreground)] hover:bg-[var(--gray-100)] dark:hover:bg-[var(--gray-800)]",
+                    "transition-colors duration-100 focus-ring"
+                  )}
+                  aria-label={`Sort by ${col}`}
+                >
                   {col}
                   {sort?.column === col ? (
                     sort.direction === "asc" ? (
@@ -91,13 +96,13 @@ export function ResultsTable({ data, sort, onSortChange }: ResultsTableProps) {
                   ) : (
                     <ArrowUpDown size={12} className="opacity-30" />
                   )}
-                </span>
+                </button>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {sortedData.map((row, rowIdx) => (
+          {data.map((row, rowIdx) => (
             <tr
               key={rowIdx}
               className={cn(

@@ -38,20 +38,21 @@ export function executeQuery(
  * Recursively processes children using the group's combinator.
  */
 function evaluateGroup(group: QueryGroup, row: Row): boolean {
-  // Empty group matches nothing
-  if (group.children.length === 0) return false;
+  let combined = false;
 
-  const results = group.children.map((child) => {
-    if (child.type === "group") {
-      return evaluateGroup(child, row);
-    }
-    return evaluateRule(child, row);
-  });
+  if (group.children.length > 0) {
+    const results = group.children.map((child) => {
+      if (child.type === "group") {
+        return evaluateGroup(child, row);
+      }
+      return evaluateRule(child, row);
+    });
 
-  const combined =
-    group.combinator === "AND"
-      ? results.every(Boolean)
-      : results.some(Boolean);
+    combined =
+      group.combinator === "AND"
+        ? results.every(Boolean)
+        : results.some(Boolean);
+  }
 
   return group.negated ? !combined : combined;
 }
