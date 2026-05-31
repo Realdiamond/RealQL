@@ -29,8 +29,12 @@ export function sortRows(data: Row[], sort: SortState | null): Row[] {
     const bVal = b[sort.column];
     const dir = sort.direction === "asc" ? 1 : -1;
 
-    if (aVal === null || aVal === undefined) return 1 * dir;
-    if (bVal === null || bVal === undefined) return -1 * dir;
+    const isANull = aVal === null || aVal === undefined;
+    const isBNull = bVal === null || bVal === undefined;
+
+    if (isANull && isBNull) return 0;
+    if (isANull) return 1;
+    if (isBNull) return -1;
 
     if (typeof aVal === "number" && typeof bVal === "number") {
       return (aVal - bVal) * dir;
