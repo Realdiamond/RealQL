@@ -8,11 +8,12 @@
  * visually traceable without being flashy.
  */
 
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 interface NestingIndicatorProps {
   depth: number;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 /**

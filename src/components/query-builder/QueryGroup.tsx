@@ -21,6 +21,7 @@ import type {
 } from "@/lib/types";
 import { useQueryStore } from "@/lib/store/query-store";
 import { collectRules } from "@/lib/engine/tree-utils";
+import { getSchema } from "@/lib/schemas/registry";
 
 interface QueryGroupProps {
   group: QueryGroupType;
@@ -40,6 +41,11 @@ export function QueryGroup({
   const toggleCollapse = useQueryStore((s) => s.toggleCollapse);
   const updateRule = useQueryStore((s) => s.updateRule);
   const duplicateNode = useQueryStore((s) => s.duplicateNode);
+  const activeSchemaId = useQueryStore((s) => s.activeSchemaId);
+
+  // Resolve schema fields for the active data source
+  const schema = getSchema(activeSchemaId);
+  const fields = schema?.fields ?? [];
 
   const totalRules = collectRules(group).length;
 
@@ -92,6 +98,7 @@ export function QueryGroup({
                     key={child.id}
                     rule={child as QueryRuleType}
                     depth={depth}
+                    fields={fields}
                     onUpdate={(updates) =>
                       updateRule(child.id, updates)
                     }

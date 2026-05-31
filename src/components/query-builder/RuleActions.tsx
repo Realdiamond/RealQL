@@ -36,6 +36,7 @@ export function RuleActions({
         )}
         aria-label={disabled ? "Enable rule" : "Disable rule"}
         title={disabled ? "Enable rule" : "Disable rule"}
+        aria-pressed={disabled}
       >
         {disabled ? (
           <Eye className="h-3.5 w-3.5" />
