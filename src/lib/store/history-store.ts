@@ -122,11 +122,12 @@ export const useHistoryStore = create<HistoryState>()(
 
           if (!valid) return false;
 
-          // Normalize createdAt
+          // Normalize and assign new unique IDs to avoid collisions
           const normalized = parsed.map((item: unknown) => {
             const obj = item as Record<string, unknown>;
             return {
               ...obj,
+              id: generateId(),
               createdAt:
                 typeof obj.createdAt === "number"
                   ? obj.createdAt

@@ -259,8 +259,13 @@ export const useQueryStore = create<QueryState>((set, get) => ({
 
       const [previous, ...rest] = state.undoStack;
       const currentSnapshot: HistorySnapshot = { rootGroup: state.rootGroup, activeSchemaId: state.activeSchemaId };
+      
+      // Preserve current UI collapse state map across history restorations
+      const collapseMap = getCollapseMap(state.rootGroup);
+      const restoredRoot = applyCollapseMap(previous.rootGroup, collapseMap);
+
       return {
-        rootGroup: previous.rootGroup,
+        rootGroup: restoredRoot,
         activeSchemaId: previous.activeSchemaId,
         undoStack: rest,
         redoStack: [currentSnapshot, ...state.redoStack],
@@ -274,8 +279,13 @@ export const useQueryStore = create<QueryState>((set, get) => ({
 
       const [next, ...rest] = state.redoStack;
       const currentSnapshot: HistorySnapshot = { rootGroup: state.rootGroup, activeSchemaId: state.activeSchemaId };
+      
+      // Preserve current UI collapse state map across history restorations
+      const collapseMap = getCollapseMap(state.rootGroup);
+      const restoredRoot = applyCollapseMap(next.rootGroup, collapseMap);
+
       return {
-        rootGroup: next.rootGroup,
+        rootGroup: restoredRoot,
         activeSchemaId: next.activeSchemaId,
         undoStack: [currentSnapshot, ...state.undoStack],
         redoStack: rest,
@@ -283,6 +293,38 @@ export const useQueryStore = create<QueryState>((set, get) => ({
     });
   },
 }));
+
+/** Helper: extract map of groupId -> collapsed from a tree */
+function getCollapseMap(
+  group: QueryGroup,
+  map: Record<string, boolean> = {}
+): Record<string, boolean> {
+  if (group.collapsed !== undefined) {
+    map[group.id] = group.collapsed;
+  }
+  for (const child of group.children) {
+    if (child.type === "group") {
+      getCollapseMap(child as QueryGroup, map);
+    }
+  }
+  return map;
+}
+
+/** Helper: apply map of groupId -> collapsed back onto a restored tree */
+function applyCollapseMap(
+  group: QueryGroup,
+  map: Record<string, boolean>
+): QueryGroup {
+  return {
+    ...group,
+    collapsed: map[group.id] ?? group.collapsed,
+    children: group.children.map((child) =>
+      child.type === "group"
+        ? applyCollapseMap(child as QueryGroup, map)
+        : child
+    ),
+  };
+}
 
 /** Helper: find parent of a node in the tree */
 function findParentFromTree(

@@ -64,6 +64,8 @@
   --surface: #ffffff;
   --surface-secondary: #fafafa;
   --surface-elevated: #ffffff;
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--foreground);
   --border: #e4e4e7;
   --border-subtle: #f4f4f5;
   --ring: #6366f1;
@@ -109,6 +111,8 @@
   --surface: #18181b;
   --surface-secondary: #1f1f23;
   --surface-elevated: #27272a;
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--foreground);
   --border: #27272a;
   --border-subtle: #1f1f23;
   --ring: #818cf8;
@@ -128,6 +132,8 @@
   --color-surface: var(--surface);
   --color-surface-secondary: var(--surface-secondary);
   --color-surface-elevated: var(--surface-elevated);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-border: var(--border);
   --color-border-subtle: var(--border-subtle);
   --color-ring: var(--ring);
