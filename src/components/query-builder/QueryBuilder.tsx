@@ -62,10 +62,9 @@ export function QueryBuilder() {
 
   // Prevent hydration mismatch for UUIDs generated on the server vs client
   useEffect(() => {
-    setIsMounted(true);
+    const t = setTimeout(() => setIsMounted(true), 0);
+    return () => clearTimeout(t);
   }, []);
-
-  if (!isMounted) return null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -117,6 +116,8 @@ export function QueryBuilder() {
 
     moveNode(activeNodeId, targetParent.id, newIndex);
   }, [rootGroup, moveNode]);
+
+  if (!isMounted) return null;
 
   return (
     <div className="flex flex-col h-full">
