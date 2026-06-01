@@ -330,7 +330,6 @@ export function HistorySidebar() {
                 </div>
               )}
             </div>
-
             {/* Import/Export footer */}
             <ImportExportActions />
           </motion.div>
