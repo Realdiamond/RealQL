@@ -14,7 +14,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils/cn";
-import { QueryRule } from "../QueryRule";
+import { MemoizedQueryRule } from "../QueryRule";
 import type {
   QueryRule as QueryRuleType,
   SchemaField,
@@ -57,7 +57,7 @@ export function SortableRule({ rule, ...ruleProps }: SortableRuleProps) {
         isDragging && "opacity-40 z-10"
       )}
     >
-      <QueryRule
+      <MemoizedQueryRule
         {...ruleProps}
         rule={rule}
         dragHandleRef={setActivatorNodeRef}

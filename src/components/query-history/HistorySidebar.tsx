@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock, Bookmark, Trash2, Play } from "lucide-react";
+import { ImportExportActions } from "./ImportExportActions";
 import { useUIStore } from "@/lib/store/ui-store";
 import { useQueryHistoryStore, type SavedQuery } from "@/lib/store/query-history-store";
 import { useQueryStore } from "@/lib/store/query-store";
@@ -329,6 +330,9 @@ export function HistorySidebar() {
                 </div>
               )}
             </div>
+
+            {/* Import/Export footer */}
+            <ImportExportActions />
           </motion.div>
         </>
       )}

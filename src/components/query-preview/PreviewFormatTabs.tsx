@@ -19,6 +19,7 @@ const FORMATS: { value: QueryOutputFormat; label: string }[] = [
   { value: "sql", label: "SQL" },
   { value: "mongodb", label: "MongoDB" },
   { value: "graphql", label: "GraphQL" },
+  { value: "json", label: "JSON" },
 ];
 
 export function PreviewFormatTabs({

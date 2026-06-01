@@ -42,7 +42,9 @@ export type OperatorType =
   | "between"
   | "is_null"
   | "is_not_null"
-  | "regex";
+  | "regex"
+  | "before"
+  | "after";
 
 export type RuleValue =
   | string
@@ -60,7 +62,7 @@ export interface ValidationError {
   severity: "error" | "warning";
 }
 
-export type QueryOutputFormat = "sql" | "mongodb" | "graphql";
+export type QueryOutputFormat = "sql" | "mongodb" | "graphql" | "json";
 
 export interface QueryOutput {
   format: QueryOutputFormat;

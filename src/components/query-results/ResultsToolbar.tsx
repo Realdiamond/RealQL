@@ -18,6 +18,8 @@ interface ResultsToolbarProps {
   executionTimeMs: number | null;
   pageSize: number;
   onPageSizeChange: (size: number) => void;
+  viewMode: "table" | "cards";
+  onViewModeChange: (mode: "table" | "cards") => void;
 }
 
 const PAGE_SIZES = [10, 25, 50, 100];
@@ -30,11 +32,13 @@ export function ResultsToolbar({
   executionTimeMs,
   pageSize,
   onPageSizeChange,
+  viewMode,
+  onViewModeChange,
 }: ResultsToolbarProps) {
   const hasResults = matchedCount !== null;
 
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-[var(--border)] bg-[var(--surface)]">
+    <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-[var(--border)] bg-[var(--surface)] flex-wrap">
       {/* Left: Execute button + stats */}
       <div className="flex items-center gap-3">
         <button
@@ -80,32 +84,61 @@ export function ResultsToolbar({
         )}
       </div>
 
-      {/* Right: Page size selector */}
+      {/* Right: Layout toggle + Page size */}
       {hasResults && matchedCount > 0 && (
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor="page-size-select"
-            className="text-xs text-[var(--gray-500)]"
-          >
-            Show
-          </label>
-          <select
-            id="page-size-select"
-            value={pageSize}
-            onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className={cn(
-              "text-xs px-2 py-1 rounded-md",
-              "border border-[var(--border)] bg-[var(--surface)]",
-              "text-[var(--foreground)]",
-              "focus:outline-none focus:ring-1 focus:ring-[var(--ring)]"
-            )}
-          >
-            {PAGE_SIZES.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 p-0.5 rounded-md bg-[var(--surface-secondary)] border border-[var(--border)]">
+            <button
+              type="button"
+              onClick={() => onViewModeChange("table")}
+              className={cn(
+                "px-2 py-1 text-xs font-medium rounded-sm transition-colors",
+                viewMode === "table"
+                  ? "bg-[var(--surface)] text-[var(--foreground)] shadow-sm"
+                  : "text-[var(--gray-500)] hover:text-[var(--foreground)]"
+              )}
+            >
+              Table
+            </button>
+            <button
+              type="button"
+              onClick={() => onViewModeChange("cards")}
+              className={cn(
+                "px-2 py-1 text-xs font-medium rounded-sm transition-colors",
+                viewMode === "cards"
+                  ? "bg-[var(--surface)] text-[var(--foreground)] shadow-sm"
+                  : "text-[var(--gray-500)] hover:text-[var(--foreground)]"
+              )}
+            >
+              Cards
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="page-size-select"
+              className="text-xs text-[var(--gray-500)]"
+            >
+              Show
+            </label>
+            <select
+              id="page-size-select"
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              className={cn(
+                "text-xs px-2 py-1 rounded-md",
+                "border border-[var(--border)] bg-[var(--surface)]",
+                "text-[var(--foreground)]",
+                "focus:outline-none focus:ring-1 focus:ring-[var(--ring)]"
+              )}
+            >
+              {PAGE_SIZES.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
     </div>

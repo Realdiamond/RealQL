@@ -10,7 +10,11 @@ import { usersSchema, usersData } from "./users.schema";
 import { productsSchema, productsData } from "./products.schema";
 import { ordersSchema, ordersData } from "./orders.schema";
 
-export const SCHEMAS: DataSchema[] = [usersSchema, productsSchema, ordersSchema];
+export const SCHEMAS: DataSchema[] = [
+  usersSchema,
+  productsSchema,
+  ordersSchema,
+];
 
 export type SchemaId = "users" | "products" | "orders";
 

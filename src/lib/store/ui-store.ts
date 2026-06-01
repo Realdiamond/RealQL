@@ -29,7 +29,7 @@ interface UIState {
   setSavePresetDialogOpen: (open: boolean) => void;
 }
 
-const FORMAT_CYCLE: QueryOutputFormat[] = ["sql", "mongodb", "graphql"];
+const FORMAT_CYCLE: QueryOutputFormat[] = ["sql", "mongodb", "graphql", "json"];
 
 export const useUIStore = create<UIState>((set) => ({
   sidebarOpen: true,
