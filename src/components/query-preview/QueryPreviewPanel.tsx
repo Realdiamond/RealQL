@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils/cn";
 import { useQueryStore } from "@/lib/store/query-store";
 import { useShallow } from "zustand/react/shallow";
 import { getSchema } from "@/lib/schemas/registry";
+import { useDebounce } from "@/hooks/use-debounce";
 import { generateQuery } from "@/lib/engine/query-generator";
 import { PreviewFormatTabs } from "./PreviewFormatTabs";
 import { CodeBlock } from "./CodeBlock";
@@ -28,14 +29,15 @@ export function QueryPreviewPanel() {
     }))
   );
   const [activeFormat, setActiveFormat] = useState<QueryOutputFormat>("sql");
+  const debouncedRootGroup = useDebounce(rootGroup, 300);
 
   // Generate query output whenever tree or format changes
   const output = useMemo(() => {
     const schema = getSchema(activeSchemaId);
     const tableName = schema?.name ?? activeSchemaId;
     const fields = schema?.fields ?? [];
-    return generateQuery(rootGroup, activeFormat, tableName, fields);
-  }, [rootGroup, activeFormat, activeSchemaId]);
+    return generateQuery(debouncedRootGroup, activeFormat, tableName, fields);
+  }, [debouncedRootGroup, activeFormat, activeSchemaId]);
 
   const errorCount = output.errors.filter((e) => e.severity === "error").length;
   const warningCount = output.errors.filter(

@@ -2,8 +2,9 @@
  * SQL query generator.
  *
  * Walks the recursive QueryGroup tree and produces a parameterized
- * SQL WHERE clause. Values are properly escaped to prevent injection.
- * The output is meant for display/preview — not direct database execution.
+ * SQL WHERE clause. Values are properly extracted to a params array
+ * to prevent injection. The output is meant for display/preview —
+ * not direct database execution.
  */
 
 import type { QueryGroup, QueryRule, OperatorType } from "@/lib/types";
@@ -13,31 +14,40 @@ import type { QueryGroup, QueryRule, OperatorType } from "@/lib/types";
  * The table name is derived from the schema name.
  */
 export function generateSQL(root: QueryGroup, tableName: string): string {
-  const whereClause = generateSQLWhere(root);
+  const params: unknown[] = [];
+  const whereClause = generateSQLWhere(root, params);
 
   if (!whereClause) {
     return `SELECT *\nFROM ${escapeIdentifier(tableName)};`;
   }
 
-  return `SELECT *\nFROM ${escapeIdentifier(tableName)}\nWHERE ${whereClause};`;
+  let result = `SELECT *\nFROM ${escapeIdentifier(tableName)}\nWHERE ${whereClause};`;
+  
+  if (params.length > 0) {
+    const jsonLines = JSON.stringify(params, null, 2).split('\n');
+    const commentedJson = jsonLines.map(line => `-- ${line}`).join('\n');
+    result += `\n\n-- Parameters:\n${commentedJson}`;
+  }
+  
+  return result;
 }
 
 /**
  * Generate just the WHERE clause portion (recursive).
  */
-export function generateSQLWhere(group: QueryGroup): string {
+export function generateSQLWhere(group: QueryGroup, params: unknown[] = []): string {
   const conditions: string[] = [];
 
   for (const child of group.children) {
     if (child.type === "group") {
-      const nested = generateSQLWhere(child);
+      const nested = generateSQLWhere(child, params);
       if (nested) {
         conditions.push(`(${nested})`);
       }
     } else {
       // Skip disabled rules
       if (child.disabled) continue;
-      const clause = ruleToSQL(child);
+      const clause = ruleToSQL(child, params);
       if (clause) {
         conditions.push(clause);
       }
@@ -60,7 +70,7 @@ export function generateSQLWhere(group: QueryGroup): string {
 /**
  * Convert a single rule into a SQL condition fragment.
  */
-function ruleToSQL(rule: QueryRule): string | null {
+function ruleToSQL(rule: QueryRule, params: unknown[]): string | null {
   if (!rule.field || !rule.operator) return null;
 
   const field = escapeIdentifier(rule.field);
@@ -74,7 +84,7 @@ function ruleToSQL(rule: QueryRule): string | null {
   if (rule.value === null || rule.value === undefined) return null;
   if (typeof rule.value === "string" && rule.value.trim() === "") return null;
 
-  return formatSQLCondition(field, op, rule.value);
+  return formatSQLCondition(field, op, rule.value, params);
 }
 
 /**
@@ -83,65 +93,89 @@ function ruleToSQL(rule: QueryRule): string | null {
 function formatSQLCondition(
   field: string,
   operator: OperatorType,
-  value: unknown
+  value: unknown,
+  params: unknown[]
 ): string | null {
   switch (operator) {
     case "equals":
-      return `${field} = ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} = $${params.length}`;
 
     case "not_equals":
-      return `${field} != ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} != $${params.length}`;
 
     case "contains":
-      return `${field} ILIKE ${escapeValue(`%${escapeLike(value)}%`)} ESCAPE '\\'`;
+      params.push(`%${escapeLike(value)}%`);
+      return `${field} ILIKE $${params.length} ESCAPE '\\'`;
 
     case "not_contains":
-      return `${field} NOT ILIKE ${escapeValue(`%${escapeLike(value)}%`)} ESCAPE '\\'`;
+      params.push(`%${escapeLike(value)}%`);
+      return `${field} NOT ILIKE $${params.length} ESCAPE '\\'`;
 
     case "starts_with":
-      return `${field} ILIKE ${escapeValue(`${escapeLike(value)}%`)} ESCAPE '\\'`;
+      params.push(`${escapeLike(value)}%`);
+      return `${field} ILIKE $${params.length} ESCAPE '\\'`;
 
     case "ends_with":
-      return `${field} ILIKE ${escapeValue(`%${escapeLike(value)}`)} ESCAPE '\\'`;
+      params.push(`%${escapeLike(value)}`);
+      return `${field} ILIKE $${params.length} ESCAPE '\\'`;
 
     case "greater_than":
-      return `${field} > ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} > $${params.length}`;
 
     case "greater_than_or_equal":
-      return `${field} >= ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} >= $${params.length}`;
 
     case "less_than":
-      return `${field} < ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} < $${params.length}`;
 
     case "less_than_or_equal":
-      return `${field} <= ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} <= $${params.length}`;
 
     case "in_array": {
       if (!Array.isArray(value) || value.length === 0) return null;
-      const items = value.map((v) => escapeValue(v)).join(", ");
-      return `${field} IN (${items})`;
+      const placeholders = value.map((v) => {
+        params.push(v);
+        return `$${params.length}`;
+      });
+      return `${field} IN (${placeholders.join(", ")})`;
     }
 
     case "not_in_array": {
       if (!Array.isArray(value) || value.length === 0) return null;
-      const items = value.map((v) => escapeValue(v)).join(", ");
-      return `${field} NOT IN (${items})`;
+      const placeholders = value.map((v) => {
+        params.push(v);
+        return `$${params.length}`;
+      });
+      return `${field} NOT IN (${placeholders.join(", ")})`;
     }
 
     case "between": {
       if (!Array.isArray(value) || value.length !== 2) return null;
-      return `${field} BETWEEN ${escapeValue(value[0])} AND ${escapeValue(value[1])}`;
+      params.push(value[0]);
+      const p1 = params.length;
+      params.push(value[1]);
+      const p2 = params.length;
+      return `${field} BETWEEN $${p1} AND $${p2}`;
     }
 
     case "regex":
       // Normalize to PostgreSQL syntax (~ operator)
-      return `${field} ~ ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} ~ $${params.length}`;
 
     case "before":
-      return `${field} < ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} < $${params.length}`;
 
     case "after":
-      return `${field} > ${escapeValue(value)}`;
+      params.push(value);
+      return `${field} > $${params.length}`;
 
     default:
       return null;
@@ -156,22 +190,6 @@ function escapeIdentifier(name: string): string {
   // Strip any existing quotes and re-wrap
   const clean = name.replace(/"/g, "");
   return `"${clean}"`;
-}
-
-/**
- * Escape a value for safe SQL embedding.
- * Numbers pass through; strings get single-quoted with inner quotes escaped.
- */
-function escapeValue(value: unknown): string {
-  if (typeof value === "number") {
-    return String(value);
-  }
-  if (typeof value === "boolean") {
-    return value ? "TRUE" : "FALSE";
-  }
-  // String — escape single quotes by doubling them
-  const str = String(value).replace(/'/g, "''");
-  return `'${str}'`;
 }
 
 /**

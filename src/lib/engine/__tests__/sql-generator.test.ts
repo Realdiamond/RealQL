@@ -38,163 +38,225 @@ describe("SQL Generator", () => {
   // --- Basic operators ---
   it("should generate equals condition", () => {
     const group = makeGroup([makeRule({ field: "name", operator: "equals", value: "John" })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"name\" = 'John'");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"name\" = $1");
+    expect(params).toEqual(["John"]);
   });
 
   it("should generate not_equals condition", () => {
     const group = makeGroup([makeRule({ operator: "not_equals", value: "inactive" })]);
-    const where = generateSQLWhere(group);
-    expect(where).toContain("!=");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"name\" != $1");
+    expect(params).toEqual(["inactive"]);
   });
 
   it("should generate contains (LIKE)", () => {
     const group = makeGroup([makeRule({ operator: "contains", value: "test" })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe(`"name" ILIKE '%test%' ESCAPE '\\'`);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe(`"name" ILIKE $1 ESCAPE '\\'`);
+    expect(params).toEqual(["%test%"]);
   });
 
   it("should generate not_contains (NOT LIKE)", () => {
     const group = makeGroup([makeRule({ operator: "not_contains", value: "spam" })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe(`"name" NOT ILIKE '%spam%' ESCAPE '\\'`);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe(`"name" NOT ILIKE $1 ESCAPE '\\'`);
+    expect(params).toEqual(["%spam%"]);
   });
 
   it("should generate starts_with", () => {
     const group = makeGroup([makeRule({ operator: "starts_with", value: "Jo" })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe(`"name" ILIKE 'Jo%' ESCAPE '\\'`);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe(`"name" ILIKE $1 ESCAPE '\\'`);
+    expect(params).toEqual(["Jo%"]);
   });
 
   it("should generate ends_with", () => {
     const group = makeGroup([makeRule({ operator: "ends_with", value: "hn" })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe(`"name" ILIKE '%hn' ESCAPE '\\'`);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe(`"name" ILIKE $1 ESCAPE '\\'`);
+    expect(params).toEqual(["%hn"]);
   });
 
   it("should generate greater_than", () => {
     const group = makeGroup([makeRule({ field: "age", operator: "greater_than", value: 18 })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"age\" > 18");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"age\" > $1");
+    expect(params).toEqual([18]);
   });
 
   it("should generate less_than_or_equal", () => {
     const group = makeGroup([makeRule({ field: "age", operator: "less_than_or_equal", value: 65 })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"age\" <= 65");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"age\" <= $1");
+    expect(params).toEqual([65]);
   });
 
   it("should generate IN array", () => {
     const group = makeGroup([makeRule({ field: "status", operator: "in_array", value: ["active", "pending"] })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"status\" IN ('active', 'pending')");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"status\" IN ($1, $2)");
+    expect(params).toEqual(["active", "pending"]);
   });
 
   it("should generate NOT IN array", () => {
     const group = makeGroup([makeRule({ field: "status", operator: "not_in_array", value: ["banned"] })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"status\" NOT IN ('banned')");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"status\" NOT IN ($1)");
+    expect(params).toEqual(["banned"]);
   });
 
   it("should generate BETWEEN", () => {
     const group = makeGroup([makeRule({ field: "age", operator: "between", value: [18, 65] })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"age\" BETWEEN 18 AND 65");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"age\" BETWEEN $1 AND $2");
+    expect(params).toEqual([18, 65]);
   });
 
-  it("should generate IS NULL", () => {
-    const group = makeGroup([makeRule({ field: "email", operator: "is_null", value: null })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"email\" IS NULL");
+  it("should generate is_null", () => {
+    const group = makeGroup([makeRule({ operator: "is_null" })]);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"name\" IS NULL");
+    expect(params).toEqual([]); // no params for null
   });
 
-  it("should generate IS NOT NULL", () => {
-    const group = makeGroup([makeRule({ field: "email", operator: "is_not_null", value: null })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"email\" IS NOT NULL");
+  it("should generate is_not_null", () => {
+    const group = makeGroup([makeRule({ operator: "is_not_null" })]);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"name\" IS NOT NULL");
   });
 
   it("should generate REGEXP", () => {
     const group = makeGroup([makeRule({ operator: "regex", value: "^[A-Z]" })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"name\" ~ '^[A-Z]'");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"name\" ~ $1");
+    expect(params).toEqual(["^[A-Z]"]);
   });
 
-  // --- Combinators ---
-  it("should join with AND", () => {
+  // --- Combinators and Nesting ---
+  it("should join multiple rules with AND", () => {
     const group = makeGroup([
-      makeRule({ id: "r1", field: "name", value: "A" }),
-      makeRule({ id: "r2", field: "age", operator: "greater_than", value: 18 }),
-    ], { combinator: "AND" });
-    const where = generateSQLWhere(group);
-    expect(where).toContain(" AND ");
+      makeRule({ field: "name", value: "test" }),
+      makeRule({ field: "age", operator: "greater_than", value: 18 }),
+    ]);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"name\" = $1 AND \"age\" > $2");
+    expect(params).toEqual(["test", 18]);
   });
 
-  it("should join with OR", () => {
-    const group = makeGroup([
-      makeRule({ id: "r1", value: "A" }),
-      makeRule({ id: "r2", value: "B" }),
-    ], { combinator: "OR" });
-    const where = generateSQLWhere(group);
-    expect(where).toContain(" OR ");
+  it("should join multiple rules with OR", () => {
+    const group = makeGroup(
+      [
+        makeRule({ field: "name", value: "test" }),
+        makeRule({ field: "name", value: "other" }),
+      ],
+      { combinator: "OR" }
+    );
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"name\" = $1 OR \"name\" = $2");
+    expect(params).toEqual(["test", "other"]);
   });
 
-  // --- Nesting ---
-  it("should handle nested groups", () => {
-    const inner = makeGroup([
-      makeRule({ id: "r1", value: "test" }),
-    ], { id: "inner", combinator: "OR" });
-    const outer = makeGroup([inner, makeRule({ id: "r2", field: "age", operator: "greater_than", value: 18 })]);
-    const where = generateSQLWhere(outer);
-    expect(where).toContain("(");
-    expect(where).toContain(") AND ");
+  it("should generate nested conditions properly parenthesized", () => {
+    const outer = makeGroup([
+      makeRule({ field: "status", value: "active" }),
+      makeGroup(
+        [
+          makeRule({ field: "age", operator: "less_than", value: 18 }),
+          makeRule({ field: "age", operator: "greater_than", value: 65 }),
+        ],
+        { combinator: "OR" }
+      ),
+    ]);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(outer, params);
+    expect(where).toBe("\"status\" = $1 AND (\"age\" < $2 OR \"age\" > $3)");
+    expect(params).toEqual(["active", 18, 65]);
   });
 
-  // --- Full SELECT ---
-  it("should generate a full SELECT statement", () => {
+  // --- Full statement generation ---
+  it("should wrap in SELECT statement", () => {
     const group = makeGroup([makeRule({ value: "test" })]);
     const sql = generateSQL(group, "users");
     expect(sql).toContain("SELECT *");
     expect(sql).toContain('FROM "users"');
-    expect(sql).toContain("WHERE");
+    expect(sql).toContain('WHERE "name" = $1');
+    expect(sql).toContain('-- Parameters:\n-- [\n--   "test"\n-- ]');
   });
 
-  it("should generate SELECT without WHERE for empty group", () => {
+  it("should generate SELECT without WHERE if group is empty", () => {
     const group = makeGroup([]);
     const sql = generateSQL(group, "users");
-    expect(sql).toContain("SELECT *");
-    expect(sql).not.toContain("WHERE");
+    expect(sql).toBe('SELECT *\nFROM "users";');
   });
 
-  // --- Escaping ---
-  it("should escape single quotes in values", () => {
-    const group = makeGroup([makeRule({ value: "O'Brien" })]);
-    const where = generateSQLWhere(group);
-    expect(where).toContain("O''Brien");
-  });
-
-  // --- Disabled rules ---
-  it("should skip disabled rules", () => {
+  // --- Edge cases ---
+  it("should ignore rules with missing values", () => {
     const group = makeGroup([
-      makeRule({ id: "r1", value: "active", disabled: true }),
-      makeRule({ id: "r2", field: "age", operator: "greater_than", value: 18 }),
+      makeRule({ value: "" }),
+      makeRule({ value: null as unknown as string }),
+      makeRule({ value: undefined as unknown as string }),
     ]);
-    const where = generateSQLWhere(group);
-    expect(where).not.toContain("name");
-    expect(where).toContain("age");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("");
   });
 
-  // --- Negation ---
-  it("should wrap negated groups with NOT", () => {
+  it("should ignore disabled rules", () => {
+    const group = makeGroup([
+      makeRule({ value: "test1", disabled: true }),
+      makeRule({ value: "test2" }),
+    ]);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"name\" = $1");
+    expect(params).toEqual(["test2"]);
+  });
+
+  it("should prefix NOT when group is negated", () => {
     const group = makeGroup([makeRule({ value: "test" })], { negated: true });
-    const where = generateSQLWhere(group);
-    expect(where).toContain("NOT (");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("NOT (\"name\" = $1)");
   });
 
-  // --- Boolean values ---
+  it("should escape identifiers", () => {
+    const group = makeGroup([makeRule({ field: 'drop"table', value: "test" })]);
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    // Should strip quotes
+    expect(where).toBe("\"droptable\" = $1");
+  });
+
+  it("should escape like strings", () => {
+    const group = makeGroup([makeRule({ operator: "contains", value: "test%" })]);
+    const params: unknown[] = [];
+    generateSQLWhere(group, params);
+    // % should be escaped
+    expect(params[0]).toBe("%test\\%%");
+  });
+
   it("should handle boolean TRUE/FALSE values", () => {
     const group = makeGroup([makeRule({ field: "isVerified", operator: "equals", value: true })]);
-    const where = generateSQLWhere(group);
-    expect(where).toBe("\"isVerified\" = TRUE");
+    const params: unknown[] = [];
+    const where = generateSQLWhere(group, params);
+    expect(where).toBe("\"isVerified\" = $1");
+    expect(params).toEqual([true]);
   });
 });
