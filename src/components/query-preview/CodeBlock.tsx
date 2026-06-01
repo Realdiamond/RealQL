@@ -145,7 +145,7 @@ function highlightJSON(code: string): string {
   return code.replace(regex, (match, opKey, regKey, strVal, num, bool) => {
     if (opKey) return `<span style="color: var(--indigo-400); font-weight: 600;">${opKey}</span>`;
     if (regKey) return `<span style="color: var(--foreground);">${regKey}</span>`;
-    if (strVal) return `<span style="color: var(--success);">${strVal}</span>`;
+    if (strVal) return `<span style="color: var(--secondary);">${strVal}</span>`;
     if (num) return `<span style="color: var(--color-warning);">${num}</span>`;
     if (bool) return `<span style="color: var(--indigo-400);">${bool}</span>`;
     return match;
