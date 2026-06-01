@@ -68,7 +68,8 @@ export function QueryGroup({
 
   return (
     <NestingIndicator depth={depth}>
-      <div
+      <motion.div
+        layout
         className={cn(
           "rounded-lg",
           depth > 0 && "bg-[var(--surface-secondary)]/30",
@@ -96,23 +97,22 @@ export function QueryGroup({
 
         {/* Children — hidden when collapsed */}
         {!group.collapsed && (
-          <div className="flex flex-col gap-2 px-3 pb-3">
+          <motion.div layout className="flex flex-col gap-2 px-3 pb-3">
             {group.children.length === 0 ? (
               <EmptyGroupState onAddRule={() => addRule(group.id)} />
             ) : (
               <SortableContext items={group.children.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-                <AnimatePresence initial={false} mode="popLayout">
+                <AnimatePresence initial={false}>
                 {group.children.map((child) => {
                   if (child.type === "group") {
                     // RECURSIVE: render another QueryGroup
                     return (
                       <motion.div
                         key={child.id}
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, height: 0, overflow: "hidden" }}
+                        animate={{ opacity: 1, height: "auto", overflow: "visible" }}
                         exit={{ opacity: 0, height: 0, overflow: "hidden" }}
-                        transition={{ duration: 0.2 }}
-                        layout
+                        transition={{ type: "spring", stiffness: 500, damping: 30, opacity: { duration: 0.2 } }}
                       >
                       <SortableGroup id={child.id}>
                         {(handleRef, handleProps) => (
@@ -133,11 +133,10 @@ export function QueryGroup({
                   return (
                     <motion.div
                       key={child.id}
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, height: 0, overflow: "hidden" }}
+                      animate={{ opacity: 1, height: "auto", overflow: "visible" }}
                       exit={{ opacity: 0, height: 0, overflow: "hidden" }}
-                      transition={{ duration: 0.2 }}
-                      layout
+                      transition={{ type: "spring", stiffness: 500, damping: 30, opacity: { duration: 0.2 } }}
                     >
                     <SortableRule
                       rule={child as QueryRuleType}
@@ -156,7 +155,7 @@ export function QueryGroup({
                 </AnimatePresence>
               </SortableContext>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* Group-level validation messages */}
@@ -165,7 +164,7 @@ export function QueryGroup({
             <ValidationMessage errors={groupErrors} />
           </div>
         )}
-      </div>
+      </motion.div>
     </NestingIndicator>
   );
 }
