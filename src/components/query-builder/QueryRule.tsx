@@ -110,9 +110,24 @@ export function QueryRule({
         fieldType={fieldType}
         disabled={rule.disabled}
         onChange={(operator) => {
-          let defaultValue: RuleValue = "";
-          if (fieldType === "boolean") defaultValue = true;
-          onUpdate({ operator, value: defaultValue });
+          const newRequiresBoolean = fieldType === "boolean" || operator === "is_null" || operator === "is_not_null";
+          const oldRequiresBoolean = typeof rule.value === "boolean";
+          
+          const newRequiresArray = operator === "in_array" || operator === "not_in_array";
+          const oldIsArray = Array.isArray(rule.value);
+          
+          const newRequiresRange = operator === "between";
+          const oldIsRange = Array.isArray(rule.value) && rule.value.length === 2;
+
+          if (newRequiresBoolean !== oldRequiresBoolean || newRequiresArray !== oldIsArray || newRequiresRange !== oldIsRange) {
+            let defaultValue: RuleValue = "";
+            if (fieldType === "boolean") defaultValue = true;
+            if (newRequiresArray) defaultValue = [];
+            if (newRequiresRange) defaultValue = ["", ""];
+            onUpdate({ operator, value: defaultValue });
+          } else {
+            onUpdate({ operator, value: rule.value });
+          }
         }}
       />
 

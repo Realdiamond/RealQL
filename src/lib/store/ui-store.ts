@@ -37,6 +37,7 @@ export const useUIStore = create<UIState>((set) => ({
   shortcutsDialogOpen: false,
   historySidebarOpen: false,
   savePresetDialogOpen: false,
+  activeHistoryTab: "history",
 
   toggleSidebar: () => {
     set((state) => ({ sidebarOpen: !state.sidebarOpen }));

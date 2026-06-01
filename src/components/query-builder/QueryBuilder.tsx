@@ -14,7 +14,7 @@ import { SCHEMAS, type SchemaId, getSchema } from "@/lib/schemas/registry";
 import { cn } from "@/lib/utils/cn";
 import { Database, RotateCcw, Undo2, Redo2 } from "lucide-react";
 import { useQueryValidation } from "@/hooks/use-query-validation";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   DndContext,
   closestCorners,
@@ -58,6 +58,14 @@ export function QueryBuilder() {
   const validationErrors = useQueryValidation(rootGroup, fields);
 
   const [activeNode, setActiveNode] = useState<QueryNode | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Prevent hydration mismatch for UUIDs generated on the server vs client
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

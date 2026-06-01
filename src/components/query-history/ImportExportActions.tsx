@@ -74,7 +74,7 @@ export function ImportExportActions() {
     e.target.value = "";
 
     // Check file extension
-    if (!file.name.endsWith(".json")) {
+    if (!file.name.toLowerCase().endsWith(".json")) {
       setImportError("Invalid file format. Please select a .json file.");
       return;
     }

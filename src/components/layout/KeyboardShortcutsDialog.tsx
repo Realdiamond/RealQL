@@ -91,7 +91,7 @@ function ShortcutSection({
               {shortcut.label.split(" ").map((keyLabel, i) => (
                 <kbd
                   key={i}
-                  className="inline-flex min-w-[24px] items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface-hover)] px-1.5 py-0.5 text-xs font-mono text-[var(--foreground)] font-medium shadow-sm"
+                  className="inline-flex min-w-[24px] items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] px-1.5 py-0.5 text-xs font-mono text-[var(--foreground)] font-medium shadow-sm"
                 >
                   {formatKey(keyLabel)}
                 </kbd>

@@ -68,7 +68,7 @@ export function CodeBlock({ code, format }: CodeBlockProps) {
           "text-[var(--gray-400)] hover:text-[var(--foreground)]",
           "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100",
           "transition-all duration-150",
-          copied && "opacity-100 text-[var(--success)]"
+          copied && "opacity-100 text-[var(--color-success)]"
         )}
         aria-label={copied ? "Copied!" : "Copy to clipboard"}
       >
@@ -117,6 +117,7 @@ function highlightCode(code: string, format: QueryOutputFormat): string {
     case "sql":
       return highlightSQL(escaped);
     case "mongodb":
+    case "json":
       return highlightJSON(escaped);
     case "graphql":
       return highlightGraphQL(escaped);

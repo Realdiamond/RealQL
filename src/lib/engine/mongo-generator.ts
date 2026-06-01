@@ -144,11 +144,13 @@ function formatMongoCondition(
       if (!Array.isArray(value) || value.length !== 2) return null;
       const gte = typedValue(value[0], fieldType);
       const lte = typedValue(value[1], fieldType);
-      if (
-        gte === "" || gte === null || Number.isNaN(Number(gte)) ||
-        lte === "" || lte === null || Number.isNaN(Number(lte))
-      ) {
+      if (gte === "" || gte === null || lte === "" || lte === null) {
         return null;
+      }
+      if (fieldType === "number") {
+        if (Number.isNaN(Number(gte)) || Number.isNaN(Number(lte))) {
+          return null;
+        }
       }
       return {
         [field]: {

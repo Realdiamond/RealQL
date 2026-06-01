@@ -27,7 +27,7 @@ export function Header() {
       <div className="flex items-center gap-1">
         <button
           onClick={() => setHistorySidebarOpen(true)}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--gray-500)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--gray-500)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
           title="History & Presets"
           aria-label="History & Presets"
         >
@@ -35,7 +35,7 @@ export function Header() {
         </button>
         <button
           onClick={() => setShortcutsDialogOpen(true)}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--gray-500)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--gray-500)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
           title="Keyboard shortcuts (⌘ /)"
           aria-label="Keyboard shortcuts"
         >
