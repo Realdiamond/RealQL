@@ -44,7 +44,7 @@ export function ResultsLoadingState({
             <div
               key={`cell-${rowIdx}-${colIdx}`}
               className={cn(
-                "h-4 rounded bg-[var(--gray-150)] dark:bg-[var(--gray-800)]",
+                "h-4 rounded bg-[var(--gray-100)] dark:bg-[var(--gray-800)]",
                 "animate-pulse",
                 colIdx === 0 ? "w-28" : "flex-1"
               )}

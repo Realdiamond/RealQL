@@ -36,10 +36,16 @@ jobs:
         run: pnpm lint
 
       - name: Type Check
-        run: pnpm check-types
+        run: pnpm typecheck
 
       - name: Test
-        run: pnpm test
+        run: pnpm test:coverage
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E Test
+        run: pnpm test:e2e
 
       - name: Build
         run: pnpm build

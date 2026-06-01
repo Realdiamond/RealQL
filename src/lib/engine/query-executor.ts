@@ -40,8 +40,10 @@ export function executeQuery(
 function evaluateGroup(group: QueryGroup, row: Row): boolean {
   let combined = true;
 
-  if (group.children.length > 0) {
-    const results = group.children.map((child) => {
+  const validChildren = group.children.filter(child => child.type === "group" || !child.disabled);
+
+  if (validChildren.length > 0) {
+    const results = validChildren.map((child) => {
       if (child.type === "group") {
         return evaluateGroup(child, row);
       }
@@ -62,9 +64,6 @@ function evaluateGroup(group: QueryGroup, row: Row): boolean {
  * Disabled rules always pass (they don't filter anything out).
  */
 function evaluateRule(rule: QueryRule, row: Row): boolean {
-  // Disabled rules are treated as "always true" — they don't filter
-  if (rule.disabled) return true;
-
   // Rules with no field selected can't match — skip gracefully
   if (!rule.field) return true;
 
@@ -221,6 +220,15 @@ function compareNumericOrDate(
   const rNum = toNumber(ruleValue);
   if (fNum !== null && rNum !== null) {
     return fNum - rNum;
+  }
+
+  // Handle mixed types explicitly
+  if ((fNum !== null) !== (rNum !== null)) {
+    const f = Number(fieldValue);
+    const r = Number(ruleValue);
+    if (Number.isNaN(f)) return -1;
+    if (Number.isNaN(r)) return 1;
+    return f - r;
   }
 
   // Fall back to string comparison (works for ISO date strings)

@@ -137,7 +137,7 @@ The UI uses a custom CSS variable-based design system defined in `globals.css` (
 
 | Technology | Version | Purpose |
 |---|---|---|
-| Next.js | 15 (App Router) | React framework |
+| Next.js | 16.2.6 (App Router) | React framework |
 | TypeScript | 5.x | Type safety |
 | Zustand | 5.x | State management |
 | TailwindCSS | 4.x | Styling |
@@ -152,7 +152,7 @@ The UI uses a custom CSS variable-based design system defined in `globals.css` (
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 20+ (Required for Next.js 16 and uuid@14 global crypto)
 - pnpm 9+
 
 ### Installation
@@ -173,11 +173,17 @@ Open [http://localhost:3000](http://localhost:3000).
 pnpm build
 ```
 
-### Test
-```bash
-pnpm test
-```
+### Validation & Testing
 
+We enforce strict validation to ensure stability. Use the following commands:
+| Command | Category | Description |
+|---|---|---|
+| `pnpm typecheck` | Lint & Type | Run TypeScript compiler checks |
+| `pnpm lint` | Lint & Type | Run ESLint to catch code quality issues |
+| `pnpm test` | Unit Tests | Run Vitest unit tests (216 tests) |
+| `pnpm test:coverage` | Unit Tests | Run Vitest and generate a coverage report |
+| `pnpm test:e2e` | E2E Tests | Run Playwright browser tests headlessly |
+| `pnpm test:e2e:ui` | E2E Tests | Run Playwright tests with a visual UI |
 ---
 
 ## 📁 Project Structure

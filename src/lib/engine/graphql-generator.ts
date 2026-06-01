@@ -52,10 +52,10 @@ export function generateGraphQLWhere(group: QueryGroup): string | null {
   if (conditions.length === 0) return null;
 
   const combinator = group.combinator === "AND" ? "_and" : "_or";
-  const inner = conditions.join(", ");
+  const inner = conditions.join("\n");
 
   if (group.negated) {
-    return `{ _not: { ${combinator}: [${inner}] } }`;
+    return `{ _not: { ${combinator}: [\n${inner}\n] } }`;
   }
 
   // Simplify: if only one condition, unwrap
@@ -63,7 +63,7 @@ export function generateGraphQLWhere(group: QueryGroup): string | null {
     return conditions[0];
   }
 
-  return `{ ${combinator}: [${inner}] }`;
+  return `{ ${combinator}: [\n${inner}\n] }`;
 }
 
 /**

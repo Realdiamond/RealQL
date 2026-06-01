@@ -121,6 +121,7 @@ export function validateRule(
       message: `'${operatorMeta?.label ?? rule.operator}' is not valid for ${schemaField.type} fields`,
       severity: "error",
     });
+    return errors;
   }
 
   // Skip value validation for operators that don't require one

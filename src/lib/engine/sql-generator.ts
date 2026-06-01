@@ -15,7 +15,7 @@ import type { QueryGroup, QueryRule, OperatorType } from "@/lib/types";
 export function generateSQL(root: QueryGroup, tableName: string): string {
   const whereClause = generateSQLWhere(root);
 
-  if (!whereClause || whereClause === "()") {
+  if (!whereClause) {
     return `SELECT *\nFROM ${escapeIdentifier(tableName)};`;
   }
 

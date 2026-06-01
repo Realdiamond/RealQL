@@ -79,9 +79,11 @@ export function useKeyboardShortcuts() {
         }
 
         case "r": {
-          e.preventDefault();
-          const queryStoreR = useQueryStore.getState();
-          queryStoreR.addRule(queryStoreR.rootGroup.id);
+          if (e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            const queryStoreR = useQueryStore.getState();
+            queryStoreR.addRule(queryStoreR.rootGroup.id);
+          }
           break;
         }
       }

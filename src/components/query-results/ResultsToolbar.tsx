@@ -91,6 +91,7 @@ export function ResultsToolbar({
             <button
               type="button"
               onClick={() => onViewModeChange("table")}
+              aria-pressed={viewMode === "table"}
               className={cn(
                 "px-2 py-1 text-xs font-medium rounded-sm transition-colors",
                 viewMode === "table"
@@ -103,6 +104,7 @@ export function ResultsToolbar({
             <button
               type="button"
               onClick={() => onViewModeChange("cards")}
+              aria-pressed={viewMode === "cards"}
               className={cn(
                 "px-2 py-1 text-xs font-medium rounded-sm transition-colors",
                 viewMode === "cards"

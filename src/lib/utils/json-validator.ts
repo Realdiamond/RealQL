@@ -68,12 +68,15 @@ function createGroupSchema(currentDepth: number): z.ZodType {
     });
   }
 
-  const childSchema: z.ZodType = z.lazy(() =>
-    z.discriminatedUnion("type", [
+  const childSchema: z.ZodType = z.lazy(() => {
+    if (currentDepth + 1 > MAX_IMPORT_DEPTH) {
+      return queryRuleSchema;
+    }
+    return z.discriminatedUnion("type", [
       queryRuleSchema,
       createGroupSchema(currentDepth + 1) as z.ZodObject<z.ZodRawShape>,
-    ])
-  );
+    ]);
+  });
 
   return z.object({
     id: z.string().min(1, "Group must have an id"),
