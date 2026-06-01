@@ -14,12 +14,13 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useQueryStore } from "@/lib/store/query-store";
 import { useShallow } from "zustand/react/shallow";
 import { useQueryHistoryStore } from "@/lib/store/query-history-store";
-import { getSchemaData } from "@/lib/schemas/registry";
+import { getSchemaData, getSchema } from "@/lib/schemas/registry";
 import { executeQuery } from "@/lib/engine/query-executor";
 import type { ExecutionResult, PaginationState, SortState } from "@/lib/types";
 import type { SchemaId } from "@/lib/schemas/registry";
 import { ResultsToolbar } from "./ResultsToolbar";
 import { ResultsTable, sortRows } from "./ResultsTable";
+import { ResultsCards } from "./ResultsCards";
 import { ResultsPagination } from "./ResultsPagination";
 import { ResultsLoadingState } from "./ResultsLoadingState";
 import { ResultsEmptyState } from "./ResultsEmptyState";
@@ -44,6 +45,7 @@ export function QueryResultsPanel() {
   const [sort, setSort] = useState<SortState | null>(null);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Track the latest execution to discard stale responses
   const executionIdRef = useRef(0);
@@ -103,6 +105,8 @@ export function QueryResultsPanel() {
   const startIdx = (currentPage - 1) * pageSize;
   const pageData = sortedData.slice(startIdx, startIdx + pageSize);
 
+  const activeSchema = getSchema(activeSchemaId as SchemaId);
+
   return (
     <div className="flex flex-col h-full">
       {/* Section header */}
@@ -122,6 +126,8 @@ export function QueryResultsPanel() {
         executionTimeMs={result?.executionTimeMs ?? null}
         pageSize={pageSize}
         onPageSizeChange={handlePageSizeChange}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
 
       {/* Content area */}
@@ -134,11 +140,18 @@ export function QueryResultsPanel() {
           <ResultsEmptyState hasExecuted={true} />
         ) : (
           <>
-            <ResultsTable
-              data={pageData}
-              sort={sort}
-              onSortChange={setSort}
-            />
+            {viewMode === "table" ? (
+              <ResultsTable
+                data={pageData}
+                sort={sort}
+                onSortChange={setSort}
+              />
+            ) : (
+              <ResultsCards 
+                data={pageData} 
+                fields={activeSchema?.fields ?? []} 
+              />
+            )}
             <ResultsPagination
               pagination={pagination}
               onPageChange={setCurrentPage}

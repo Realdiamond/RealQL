@@ -166,6 +166,20 @@ function applyOperator(
       }
     }
 
+    case "before": {
+      const fDate = new Date(toString(fieldValue)).getTime();
+      const rDate = new Date(toString(ruleValue)).getTime();
+      if (Number.isNaN(fDate) || Number.isNaN(rDate)) return false;
+      return fDate < rDate;
+    }
+
+    case "after": {
+      const fDate = new Date(toString(fieldValue)).getTime();
+      const rDate = new Date(toString(ruleValue)).getTime();
+      if (Number.isNaN(fDate) || Number.isNaN(rDate)) return false;
+      return fDate > rDate;
+    }
+
     default:
       return true;
   }

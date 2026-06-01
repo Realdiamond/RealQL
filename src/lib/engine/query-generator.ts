@@ -16,6 +16,7 @@ import type { SchemaField } from "@/lib/types";
 import { generateSQL } from "./sql-generator";
 import { generateMongoDB } from "./mongo-generator";
 import { generateGraphQL } from "./graphql-generator";
+import { generateJSON } from "./json-generator";
 import { validateQuery } from "./query-validator";
 
 /**
@@ -38,10 +39,13 @@ export function generateQuery(
       query = generateSQL(root, tableName);
       break;
     case "mongodb":
-      query = generateMongoDB(root);
+      query = generateMongoDB(root, fields);
       break;
     case "graphql":
       query = generateGraphQL(root, tableName);
+      break;
+    case "json":
+      query = generateJSON(root);
       break;
     default:
       query = "";

@@ -6,14 +6,14 @@
  * all 16 operators, and proper value typing.
  */
 
-import type { QueryGroup, QueryRule, OperatorType } from "@/lib/types";
+import type { QueryGroup, QueryRule, OperatorType, SchemaField } from "@/lib/types";
 
 /**
  * Generate a MongoDB filter document from a query tree.
  * Returns a pretty-printed JSON string.
  */
-export function generateMongoDB(root: QueryGroup): string {
-  const filter = generateMongoFilter(root);
+export function generateMongoDB(root: QueryGroup, fields: SchemaField[] = []): string {
+  const filter = generateMongoFilter(root, fields);
   return JSON.stringify(
     filter,
     (key, value) => {
@@ -28,20 +28,21 @@ export function generateMongoDB(root: QueryGroup): string {
  * Generate the raw MongoDB filter object (recursive).
  */
 export function generateMongoFilter(
-  group: QueryGroup
+  group: QueryGroup,
+  fields: SchemaField[] = []
 ): Record<string, unknown> {
   const conditions: Record<string, unknown>[] = [];
 
   for (const child of group.children) {
     if (child.type === "group") {
-      const nested = generateMongoFilter(child);
+      const nested = generateMongoFilter(child, fields);
       // Only add if there are actual conditions
       if (Object.keys(nested).length > 0) {
         conditions.push(nested);
       }
     } else {
       if (child.disabled) continue;
-      const filter = ruleToMongoFilter(child);
+      const filter = ruleToMongoFilter(child, fields);
       if (filter) {
         conditions.push(filter);
       }
@@ -68,11 +69,15 @@ export function generateMongoFilter(
 /**
  * Convert a single rule into a MongoDB filter fragment.
  */
-function ruleToMongoFilter(rule: QueryRule): Record<string, unknown> | null {
+function ruleToMongoFilter(rule: QueryRule, fields: SchemaField[]): Record<string, unknown> | null {
   if (!rule.field || !rule.operator) return null;
 
   const field = rule.field;
   const op = rule.operator;
+
+  // Look up field definition to know its intended type
+  const fieldDef = fields.find((f) => f.name === field);
+  const fieldType = fieldDef?.type;
 
   // Null check operators
   if (op === "is_null") return { [field]: { $eq: null } };
@@ -82,7 +87,7 @@ function ruleToMongoFilter(rule: QueryRule): Record<string, unknown> | null {
   if (rule.value === null || rule.value === undefined) return null;
   if (typeof rule.value === "string" && rule.value.trim() === "") return null;
 
-  return formatMongoCondition(field, op, rule.value);
+  return formatMongoCondition(field, op, rule.value, fieldType);
 }
 
 /**
@@ -91,14 +96,15 @@ function ruleToMongoFilter(rule: QueryRule): Record<string, unknown> | null {
 function formatMongoCondition(
   field: string,
   operator: OperatorType,
-  value: unknown
+  value: unknown,
+  fieldType?: string
 ): Record<string, unknown> | null {
   switch (operator) {
     case "equals":
-      return { [field]: { $eq: typedValue(value) } };
+      return { [field]: { $eq: typedValue(value, fieldType) } };
 
     case "not_equals":
-      return { [field]: { $ne: typedValue(value) } };
+      return { [field]: { $ne: typedValue(value, fieldType) } };
 
     case "contains":
       return { [field]: { $regex: escapeRegex(String(value)), $options: "i" } };
@@ -113,31 +119,31 @@ function formatMongoCondition(
       return { [field]: { $regex: `${escapeRegex(String(value))}$`, $options: "i" } };
 
     case "greater_than":
-      return { [field]: { $gt: typedValue(value) } };
+      return { [field]: { $gt: typedValue(value, fieldType) } };
 
     case "greater_than_or_equal":
-      return { [field]: { $gte: typedValue(value) } };
+      return { [field]: { $gte: typedValue(value, fieldType) } };
 
     case "less_than":
-      return { [field]: { $lt: typedValue(value) } };
+      return { [field]: { $lt: typedValue(value, fieldType) } };
 
     case "less_than_or_equal":
-      return { [field]: { $lte: typedValue(value) } };
+      return { [field]: { $lte: typedValue(value, fieldType) } };
 
     case "in_array": {
       if (!Array.isArray(value) || value.length === 0) return null;
-      return { [field]: { $in: value.map(typedValue) } };
+      return { [field]: { $in: value.map(v => typedValue(v, fieldType)) } };
     }
 
     case "not_in_array": {
       if (!Array.isArray(value) || value.length === 0) return null;
-      return { [field]: { $nin: value.map(typedValue) } };
+      return { [field]: { $nin: value.map(v => typedValue(v, fieldType)) } };
     }
 
     case "between": {
       if (!Array.isArray(value) || value.length !== 2) return null;
-      const gte = typedValue(value[0]);
-      const lte = typedValue(value[1]);
+      const gte = typedValue(value[0], fieldType);
+      const lte = typedValue(value[1], fieldType);
       if (
         gte === "" || gte === null || Number.isNaN(Number(gte)) ||
         lte === "" || lte === null || Number.isNaN(Number(lte))
@@ -155,16 +161,36 @@ function formatMongoCondition(
     case "regex":
       return { [field]: { $regex: String(value) } };
 
+    case "before":
+      return { [field]: { $lt: typedValue(value, fieldType) } };
+
+    case "after":
+      return { [field]: { $gt: typedValue(value, fieldType) } };
+
     default:
       return null;
   }
 }
 
 /**
- * Coerce a string value to its typed equivalent when possible.
- * "42" → 42, "true" → true, otherwise keep as string.
+ * Coerce a string value to its typed equivalent based on the schema.
+ * Falls back to generic heuristic if schema type is unknown.
  */
-function typedValue(value: unknown): unknown {
+function typedValue(value: unknown, fieldType?: string): unknown {
+  if (value === null || value === undefined) return value;
+  
+  if (fieldType === "number") {
+    const num = Number(value);
+    return Number.isNaN(num) ? value : num;
+  }
+  
+  if (fieldType === "boolean") {
+    if (value === "true" || value === true) return true;
+    if (value === "false" || value === false) return false;
+    return value;
+  }
+
+  // Fallback heuristic if no type provided
   if (typeof value === "number" || typeof value === "boolean") return value;
   if (typeof value === "string") {
     const trimmed = value.trim();

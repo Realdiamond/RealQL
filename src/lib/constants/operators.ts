@@ -137,6 +137,22 @@ export const OPERATORS: OperatorMeta[] = [
     valueCount: "single",
     compatibleTypes: ["string"],
   },
+  {
+    type: "before",
+    label: "is before",
+    description: "Chronologically before",
+    requiresValue: true,
+    valueCount: "single",
+    compatibleTypes: ["date"],
+  },
+  {
+    type: "after",
+    label: "is after",
+    description: "Chronologically after",
+    requiresValue: true,
+    valueCount: "single",
+    compatibleTypes: ["date"],
+  },
 ];
 
 /**

@@ -14,7 +14,7 @@ import { SCHEMAS, type SchemaId, getSchema } from "@/lib/schemas/registry";
 import { cn } from "@/lib/utils/cn";
 import { Database, RotateCcw, Undo2, Redo2 } from "lucide-react";
 import { useQueryValidation } from "@/hooks/use-query-validation";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   DndContext,
   closestCorners,
@@ -68,12 +68,12 @@ export function QueryBuilder() {
     })
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const node = findNode(rootGroup, event.active.id as string);
     if (node) setActiveNode(node);
-  };
+  }, [rootGroup]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     setActiveNode(null);
 
@@ -108,7 +108,7 @@ export function QueryBuilder() {
     }
 
     moveNode(activeNodeId, targetParent.id, newIndex);
-  };
+  }, [rootGroup, moveNode]);
 
   return (
     <div className="flex flex-col h-full">

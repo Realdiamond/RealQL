@@ -145,6 +145,12 @@ function formatGraphQLCondition(
     case "regex":
       return `{ ${field}: { _regex: ${formatGQLValue(value)} } }`;
 
+    case "before":
+      return `{ ${field}: { _lt: ${formatGQLValue(value)} } }`;
+
+    case "after":
+      return `{ ${field}: { _gt: ${formatGQLValue(value)} } }`;
+
     default:
       return null;
   }

@@ -137,6 +137,12 @@ function formatSQLCondition(
       // Normalize to PostgreSQL syntax (~ operator)
       return `${field} ~ ${escapeValue(value)}`;
 
+    case "before":
+      return `${field} < ${escapeValue(value)}`;
+
+    case "after":
+      return `${field} > ${escapeValue(value)}`;
+
     default:
       return null;
   }

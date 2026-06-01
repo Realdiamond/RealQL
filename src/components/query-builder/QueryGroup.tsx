@@ -11,6 +11,7 @@
  */
 
 import { cn } from "@/lib/utils/cn";
+import { motion, AnimatePresence } from "framer-motion";
 import { GroupToolbar } from "./GroupToolbar";
 import { NestingIndicator } from "./NestingIndicator";
 import { EmptyGroupState } from "./EmptyGroupState";
@@ -24,7 +25,7 @@ import { useQueryStore } from "@/lib/store/query-store";
 import { collectRules } from "@/lib/engine/tree-utils";
 import { getSchema } from "@/lib/schemas/registry";
 import { getErrorsForNode } from "@/lib/engine/query-validator";
-import type React from "react";
+import React from "react";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { SortableRule } from "./dnd/SortableRule";
 import { SortableGroup } from "./dnd/SortableGroup";
@@ -100,11 +101,20 @@ export function QueryGroup({
               <EmptyGroupState onAddRule={() => addRule(group.id)} />
             ) : (
               <SortableContext items={group.children.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                <AnimatePresence initial={false} mode="popLayout">
                 {group.children.map((child) => {
                   if (child.type === "group") {
                     // RECURSIVE: render another QueryGroup
                     return (
-                      <SortableGroup key={child.id} id={child.id}>
+                      <motion.div
+                        key={child.id}
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+                        transition={{ duration: 0.2 }}
+                        layout
+                      >
+                      <SortableGroup id={child.id}>
                         {(handleRef, handleProps) => (
                           <QueryGroup
                             group={child}
@@ -115,13 +125,21 @@ export function QueryGroup({
                           />
                         )}
                       </SortableGroup>
+                      </motion.div>
                     );
                   }
 
                   // Render a QueryRule
                   return (
-                    <SortableRule
+                    <motion.div
                       key={child.id}
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+                      transition={{ duration: 0.2 }}
+                      layout
+                    >
+                    <SortableRule
                       rule={child as QueryRuleType}
                       depth={depth}
                       fields={fields}
@@ -132,8 +150,10 @@ export function QueryGroup({
                       onDelete={() => removeNode(child.id)}
                       onDuplicate={() => duplicateNode(child.id)}
                     />
+                    </motion.div>
                   );
                 })}
+                </AnimatePresence>
               </SortableContext>
             )}
           </div>
@@ -149,3 +169,5 @@ export function QueryGroup({
     </NestingIndicator>
   );
 }
+
+export const MemoizedQueryGroup = React.memo(QueryGroup);

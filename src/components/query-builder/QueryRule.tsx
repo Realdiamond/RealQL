@@ -22,7 +22,7 @@ import type { QueryRule as QueryRuleType, SchemaField, FieldType, RuleValue, Val
 import { getOperatorsForFieldType } from "@/lib/constants/operators";
 import { getErrorsForNode } from "@/lib/engine/query-validator";
 import { ValidationMessage } from "./ValidationMessage";
-import type React from "react";
+import React from "react";
 
 interface QueryRuleProps {
   rule: QueryRuleType;
@@ -144,3 +144,5 @@ export function QueryRule({
     </div>
   );
 }
+
+export const MemoizedQueryRule = React.memo(QueryRule);
