@@ -130,7 +130,7 @@ export default function LandingPage() {
                 <div className="text-primary-hover"><span className="text-pink-500">FROM</span> users</div>
                 <div className="text-primary-hover"><span className="text-pink-500">WHERE</span> (</div>
                 <div className="pl-4 text-foreground">
-                  status <span className="text-pink-500">=</span> <span className="text-secondary">'active'</span>
+                  status <span className="text-pink-500">=</span> <span className="text-secondary">&apos;active&apos;</span>
                 </div>
                 <div className="pl-4 text-primary-hover"><span className="text-pink-500">AND</span> age <span className="text-pink-500">&gt;=</span> <span className="text-warning">18</span></div>
                 <div className="text-primary-hover">) <span className="text-pink-500">ORDER BY</span> created_at <span className="text-pink-500">DESC</span>;</div>
