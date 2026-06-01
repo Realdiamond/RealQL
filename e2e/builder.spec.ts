@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Query Builder E2E', () => {
   test.beforeEach(async ({ page }) => {
-    // Go to the main page
-    await page.goto('/');
+    // Go to the builder workspace
+    await page.goto('/builder');
   });
 
   test('should load the builder and verify default state', async ({ page }) => {
