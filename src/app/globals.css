@@ -22,17 +22,17 @@
   --gray-900: #18181b;
   --gray-950: #09090b;
 
-  /* --- Brand Accent (indigo-violet) --- */
-  --accent-50: #eef2ff;
-  --accent-100: #e0e7ff;
-  --accent-200: #c7d2fe;
-  --accent-300: #a5b4fc;
-  --accent-400: #818cf8;
-  --accent-500: #6366f1;
-  --accent-600: #4f46e5;
-  --accent-700: #4338ca;
-  --accent-800: #3730a3;
-  --accent-900: #312e81;
+  /* --- Brand Accent (Enterprise Blue) --- */
+  --accent-50: #eff6ff;
+  --accent-100: #dbeafe;
+  --accent-200: #bfdbfe;
+  --accent-300: #93c5fd;
+  --accent-400: #60a5fa;
+  --accent-500: #3b82f6;
+  --accent-600: #2563eb;
+  --accent-700: #1d4ed8;
+  --accent-800: #1e40af;
+  --accent-900: #1e3a8a;
 
   /* --- Semantic Colors --- */
   --success-500: #22c55e;
@@ -76,10 +76,10 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
 
-  /* --- Radius --- */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* --- Radius (Soft Edge per spec) --- */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
   --radius-full: 9999px;
 
   /* --- Transition --- */
@@ -103,24 +103,36 @@
 }
 
 .dark {
-  --and-bg: rgba(99, 102, 241, 0.12);
-  --or-bg: rgba(245, 158, 11, 0.12);
+  /* Pro-Enterprise Dark */
+  --background: #000000;
+  --foreground: #e2e2e2;
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1aa;
 
-  --background: #09090b;
-  --foreground: #fafafa;
-  --surface: #18181b;
-  --surface-secondary: #1f1f23;
-  --surface-elevated: #27272a;
+  --surface: #111111;
+  --surface-secondary: #111111;
+  --surface-elevated: #1a1a1a;
   --popover: var(--surface-elevated);
   --popover-foreground: var(--foreground);
+  
   --border: #27272a;
-  --border-subtle: #1f1f23;
-  --ring: #818cf8;
+  --border-subtle: #1a1a1a;
 
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+  /* Accent - Enterprise Blue */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary: #adc6ff;
+  --tertiary: #b7c4ff;
+  --ring: #2563eb;
+  
+  --and-bg: rgba(37, 99, 235, 0.1);
+  --or-bg: rgba(245, 158, 11, 0.12);
+
+  /* Tonal Layering Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
   color-scheme: dark;
 }
@@ -129,6 +141,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-surface: var(--surface);
   --color-surface-secondary: var(--surface-secondary);
   --color-surface-elevated: var(--surface-elevated);
@@ -155,8 +169,10 @@
   --color-info: var(--info-500);
 
   --color-and: var(--and-color);
-  --color-and-bg: var(--and-bg);
-  --color-or: var(--or-color);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
   --color-or-bg: var(--or-bg);
 
   --color-depth-0: var(--depth-0);
@@ -168,6 +184,7 @@
 
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
+  --font-heading: var(--font-outfit);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
