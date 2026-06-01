@@ -15,30 +15,33 @@ export default function Home() {
     <>
       <Header />
       <AppShell>
-        <main className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-          {/* Left: Query builder panel */}
-          <section
-            className="flex flex-1 flex-col overflow-hidden border-b lg:border-b-0 lg:border-r border-[var(--border)]"
-            aria-label="Query builder"
-          >
-            <QueryBuilder />
-          </section>
+        <main className="flex flex-col flex-1 overflow-hidden">
+          {/* Top half: Builder & Preview */}
+          <div className="flex flex-col lg:flex-row h-[50%] lg:h-[55%] border-b border-[var(--border)]">
+            {/* Top Left: Query builder panel */}
+            <section
+              className="flex flex-1 flex-col overflow-hidden border-b lg:border-b-0 lg:border-r border-[var(--border)]"
+              aria-label="Query builder"
+            >
+              <QueryBuilder />
+            </section>
 
-          {/* Right: Preview + Results stacked */}
-          <aside
-            className="w-full lg:w-[440px] flex flex-col overflow-hidden bg-[var(--surface-secondary)]"
-            aria-label="Query output"
-          >
-            {/* Top: Live query preview */}
-            <div className="border-b border-[var(--border)] max-h-[45%] overflow-auto">
+            {/* Top Right: Live query preview */}
+            <aside
+              className="w-full lg:w-[440px] xl:w-[500px] flex flex-col overflow-hidden bg-[var(--surface-secondary)]"
+              aria-label="Query preview"
+            >
               <QueryPreviewPanel />
-            </div>
+            </aside>
+          </div>
 
-            {/* Bottom: Execution results */}
-            <div className="flex-1 overflow-hidden">
-              <QueryResultsPanel />
-            </div>
-          </aside>
+          {/* Bottom half: Full width Execution results */}
+          <section
+            className="flex-1 flex flex-col overflow-hidden bg-[var(--surface-secondary)]"
+            aria-label="Query execution results"
+          >
+            <QueryResultsPanel />
+          </section>
         </main>
       </AppShell>
     </>

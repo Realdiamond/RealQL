@@ -16,7 +16,8 @@ import { useShallow } from "zustand/react/shallow";
 import { useQueryHistoryStore } from "@/lib/store/query-history-store";
 import { getSchemaData, getSchema } from "@/lib/schemas/registry";
 import { executeQuery } from "@/lib/engine/query-executor";
-import type { ExecutionResult, PaginationState, SortState } from "@/lib/types";
+import { toast } from "sonner";
+import type { PaginationState, SortState } from "@/lib/types";
 import type { SchemaId } from "@/lib/schemas/registry";
 import { ResultsToolbar } from "./ResultsToolbar";
 import { ResultsTable, sortRows } from "./ResultsTable";
@@ -30,10 +31,12 @@ const DEFAULT_PAGE_SIZE = 25;
 const SIMULATED_DELAY_MS = 600;
 
 export function QueryResultsPanel() {
-  const { rootGroup, activeSchemaId } = useQueryStore(
+  const { rootGroup, activeSchemaId, latestResult, setLatestResult } = useQueryStore(
     useShallow((state) => ({
       rootGroup: state.rootGroup,
       activeSchemaId: state.activeSchemaId,
+      latestResult: state.latestResult,
+      setLatestResult: state.setLatestResult,
     }))
   );
 
@@ -41,7 +44,6 @@ export function QueryResultsPanel() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [hasExecuted, setHasExecuted] = useState(false);
-  const [result, setResult] = useState<ExecutionResult | null>(null);
   const [sort, setSort] = useState<SortState | null>(null);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,11 +77,13 @@ export function QueryResultsPanel() {
       const dataset = getSchemaData(activeSchemaId as SchemaId);
       const executionResult = executeQuery(rootGroup, dataset);
 
-      setResult(executionResult);
+      setLatestResult(executionResult);
       addHistory(rootGroup);
       setIsLoading(false);
+      
+      toast.success(`Executed query returning ${executionResult.matchedCount} results`);
     }, SIMULATED_DELAY_MS);
-  }, [rootGroup, activeSchemaId, addHistory]);
+  }, [rootGroup, activeSchemaId, addHistory, setLatestResult]);
 
   const handlePageSizeChange = useCallback((size: number) => {
     setPageSize(size);
@@ -97,15 +101,18 @@ export function QueryResultsPanel() {
   const pagination: PaginationState = {
     page: currentPage,
     pageSize,
-    totalPages: result ? Math.max(1, Math.ceil(result.matchedCount / pageSize)) : 1,
+    totalPages: latestResult ? Math.max(1, Math.ceil(latestResult.matchedCount / pageSize)) : 1,
   };
 
-  // Sort full dataset, then slice for current page
-  const sortedData = result ? sortRows(result.data, sort) : [];
-  const startIdx = (currentPage - 1) * pageSize;
-  const pageData = sortedData.slice(startIdx, startIdx + pageSize);
+  // Sort and paginate data
+  const displayData = latestResult?.data
+    ? sortRows(latestResult.data, sort).slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+      )
+    : [];
 
-  const activeSchema = getSchema(activeSchemaId as SchemaId);
+  const schema = getSchema(activeSchemaId as SchemaId);
 
   return (
     <div className="flex flex-col h-full">
@@ -121,9 +128,9 @@ export function QueryResultsPanel() {
       <ResultsToolbar
         onExecute={handleExecute}
         isLoading={isLoading}
-        matchedCount={result?.matchedCount ?? null}
-        totalCount={result?.totalCount ?? null}
-        executionTimeMs={result?.executionTimeMs ?? null}
+        matchedCount={latestResult?.matchedCount ?? null}
+        totalCount={latestResult?.totalCount ?? null}
+        executionTimeMs={latestResult?.executionTimeMs ?? null}
         pageSize={pageSize}
         onPageSizeChange={handlePageSizeChange}
         viewMode={viewMode}
@@ -131,34 +138,28 @@ export function QueryResultsPanel() {
       />
 
       {/* Content area */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        {isLoading ? (
-          <ResultsLoadingState />
-        ) : !hasExecuted || !result ? (
+      <div className="flex-1 min-h-0 flex flex-col">
+        {!hasExecuted && !latestResult ? (
           <ResultsEmptyState hasExecuted={hasExecuted} />
-        ) : result.matchedCount === 0 ? (
-          <ResultsEmptyState hasExecuted={true} />
+        ) : isLoading ? (
+          <ResultsLoadingState />
+        ) : viewMode === "table" ? (
+          <ResultsTable
+            data={displayData}
+            sort={sort}
+            onSortChange={setSort}
+          />
         ) : (
-          <>
-            {viewMode === "table" ? (
-              <ResultsTable
-                data={pageData}
-                sort={sort}
-                onSortChange={setSort}
-              />
-            ) : (
-              <ResultsCards 
-                data={pageData} 
-                fields={activeSchema?.fields ?? []} 
-              />
-            )}
-            <ResultsPagination
-              pagination={pagination}
-              onPageChange={setCurrentPage}
-            />
-          </>
+          <ResultsCards data={displayData} fields={schema?.fields ?? []} />
         )}
       </div>
+
+      {latestResult && latestResult.matchedCount > 0 && !isLoading && (
+        <ResultsPagination
+          pagination={pagination}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 }

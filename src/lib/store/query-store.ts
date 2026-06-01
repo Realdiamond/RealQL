@@ -12,7 +12,7 @@
  */
 
 import { create } from "zustand";
-import type { QueryGroup, QueryRule } from "@/lib/types";
+import type { QueryGroup, QueryRule, ExecutionResult } from "@/lib/types";
 import type { SchemaId } from "@/lib/schemas/registry";
 import { generateId } from "@/lib/utils/id";
 import {
@@ -71,6 +71,7 @@ interface QueryState {
   // Undo/redo stacks
   undoStack: HistorySnapshot[];
   redoStack: HistorySnapshot[];
+  latestResult: ExecutionResult | null;
 
   // Actions
   addRule: (parentId: string) => void;
@@ -85,6 +86,7 @@ interface QueryState {
   setSchema: (schemaId: SchemaId) => void;
   resetQuery: () => void;
   loadQuery: (query: QueryGroup) => void;
+  setLatestResult: (result: ExecutionResult | null) => void;
   undo: () => void;
   redo: () => void;
 }
@@ -100,6 +102,7 @@ export const useQueryStore = create<QueryState>((set, get) => ({
   activeSchemaId: "users",
   undoStack: [],
   redoStack: [],
+  latestResult: null,
 
   addRule: (parentId) => {
     set((state) => ({
@@ -250,8 +253,11 @@ export const useQueryStore = create<QueryState>((set, get) => ({
     set((state) => ({
       ...pushUndo(state),
       rootGroup: query,
+      latestResult: null, // Reset execution state when loading a new query
     }));
   },
+
+  setLatestResult: (result) => set({ latestResult: result }),
 
   undo: () => {
     set((state) => {

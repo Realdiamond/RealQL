@@ -17,6 +17,7 @@ import { useShallow } from "zustand/react/shallow";
 import { getSchema } from "@/lib/schemas/registry";
 import { useDebounce } from "@/hooks/use-debounce";
 import { generateQuery } from "@/lib/engine/query-generator";
+import { generateHumanLanguage } from "@/lib/engine/human-language";
 import { PreviewFormatTabs } from "./PreviewFormatTabs";
 import { CodeBlock } from "./CodeBlock";
 import type { QueryOutputFormat } from "@/lib/types";
@@ -44,6 +45,11 @@ export function QueryPreviewPanel() {
     (e) => e.severity === "warning"
   ).length;
 
+  const humanLanguage = useMemo(
+    () => generateHumanLanguage(debouncedRootGroup, activeSchemaId),
+    [debouncedRootGroup, activeSchemaId]
+  );
+
   return (
     <div className="flex flex-col h-full">
       {/* Header with format tabs */}
@@ -65,6 +71,11 @@ export function QueryPreviewPanel() {
           activeFormat={activeFormat}
           onChange={setActiveFormat}
         />
+      </div>
+
+      {/* Human Language Explanation */}
+      <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border)] text-sm font-medium text-[var(--foreground)] italic flex items-center gap-2">
+        <span className="text-[var(--indigo-500)] dark:text-[var(--indigo-400)] not-italic">✨</span> {humanLanguage}
       </div>
 
       {/* Query output */}

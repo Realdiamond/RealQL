@@ -201,9 +201,9 @@ describe("Rule 5: Invalid value type", () => {
 // Rule 6: Empty group
 // -----------------------------------------------------------
 describe("Rule 6: Empty group", () => {
-  it("should error when group has no children", () => {
+  it("should error when nested group has no children", () => {
     const group = makeGroup([]);
-    const errors = validateQuery(group, testFields);
+    const errors = validateQuery(group, testFields, 1);
     expect(
       errors.some(
         (e) => e.message === "Group must have at least one condition"

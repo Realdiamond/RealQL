@@ -2,6 +2,8 @@
 
 import { Layers, Keyboard, Clock } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { ExportDropdown } from "./ExportDropdown";
+import { ImportButton } from "./ImportButton";
 import { useUIStore } from "@/lib/store/ui-store";
 
 export function Header() {
@@ -9,7 +11,7 @@ export function Header() {
   const setHistorySidebarOpen = useUIStore((state) => state.setHistorySidebarOpen);
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-4">
+    <header className="flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md px-4 relative z-50">
       <div className="flex items-center gap-2.5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-600 text-white">
           <Layers className="h-4 w-4" />
@@ -41,6 +43,8 @@ export function Header() {
         >
           <Keyboard className="h-[18px] w-[18px]" />
         </button>
+        <ImportButton />
+        <ExportDropdown />
         <ThemeToggle />
       </div>
     </header>

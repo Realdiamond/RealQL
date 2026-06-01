@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
+import { Toaster } from "sonner";
 import { Providers } from "@/components/layout/Providers";
 import "./globals.css";
 
@@ -48,7 +49,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background font-sans antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Toaster theme="dark" position="bottom-right" />
+        </Providers>
       </body>
     </html>
   );
