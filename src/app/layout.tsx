@@ -45,10 +45,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} dark`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable} dark overflow-hidden`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className="h-screen overflow-hidden bg-background font-sans antialiased">
         <Providers>
           {children}
           <Toaster theme="dark" position="bottom-right" />
