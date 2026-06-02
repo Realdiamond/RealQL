@@ -74,8 +74,9 @@ export function QueryPreviewPanel() {
       </div>
 
       {/* Human Language Explanation */}
-      <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border)] text-sm font-medium text-[var(--foreground)] italic flex items-center gap-2">
-        <span className="text-[var(--indigo-500)] dark:text-[var(--indigo-400)] not-italic">✨</span> {humanLanguage}
+      <div className="px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border)] text-sm font-medium text-[var(--foreground)] italic flex items-start gap-2 shrink-0 max-h-16 overflow-y-auto">
+        <span className="text-[var(--indigo-500)] dark:text-[var(--indigo-400)] not-italic shrink-0 pt-0.5">✨</span> 
+        <span className="flex-1 min-w-0 break-words whitespace-pre-wrap">{humanLanguage}</span>
       </div>
 
       {/* Query output */}

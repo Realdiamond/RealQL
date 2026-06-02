@@ -16,7 +16,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
+      <div className="flex flex-col w-full h-[calc(100vh-3.5rem)] overflow-hidden">
         {children}
       </div>
       <KeyboardShortcutsDialog />

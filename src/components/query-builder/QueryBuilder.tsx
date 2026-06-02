@@ -158,7 +158,7 @@ export function QueryBuilder() {
   if (!isMounted) return null;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Schema selector + global actions */}
       <div
         className={cn(
