@@ -4,6 +4,8 @@ export const issuesSchema: DataSchema = {
   id: "issues",
   name: "issues",
   label: "Issues",
+  description: "Linear/Jira style project management issues",
+  icon: "check-circle",
   fields: [
     { name: "id", label: "Issue ID", type: "string" },
     { name: "title", label: "Title", type: "string" },

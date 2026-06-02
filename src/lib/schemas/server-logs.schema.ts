@@ -4,6 +4,8 @@ export const serverLogsSchema: DataSchema = {
   id: "server_logs",
   name: "server_logs",
   label: "Server Logs",
+  description: "Backend infrastructure execution logs",
+  icon: "terminal",
   fields: [
     { name: "id", label: "Log ID", type: "string" },
     { name: "timestamp", label: "Timestamp", type: "date" },
