@@ -3,41 +3,31 @@
 /**
  * CodeBlock — syntax-highlighted, copyable code preview.
  *
- * Renders generated query strings with basic keyword highlighting
- * and a one-click copy button. No external syntax highlighter
- * dependency — we use a lightweight regex-based approach that
- * handles SQL, MongoDB, and GraphQL keywords cleanly.
+ * Uses Shiki for premium, VS Code quality syntax highlighting.
+ * Loads asynchronously to prevent client-side blocking.
  */
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { toast } from "sonner";
 import type { QueryOutputFormat } from "@/lib/types";
+import { codeToHtml } from "shiki";
 
 interface CodeBlockProps {
   code: string;
   format: QueryOutputFormat;
 }
 
-// Keyword sets for each format
-const SQL_KEYWORDS = [
-  "SELECT", "FROM", "WHERE", "AND", "OR", "NOT", "IN", "BETWEEN",
-  "LIKE", "IS", "NULL", "TRUE", "FALSE", "REGEXP", "ORDER", "BY",
-  "ASC", "DESC", "LIMIT", "OFFSET", "JOIN", "ON", "GROUP", "HAVING",
-];
-
-const GRAPHQL_KEYWORDS = [
-  "query", "mutation", "subscription", "fragment", "where", "order_by",
-  "limit", "offset", "true", "false", "null",
-];
-
 export function CodeBlock({ code, format }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const [html, setHtml] = useState<string>("");
 
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
+      toast.success("Query copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback for older browsers
@@ -48,11 +38,31 @@ export function CodeBlock({ code, format }: CodeBlockProps) {
       document.execCommand("copy");
       document.body.removeChild(textarea);
       setCopied(true);
+      toast.success("Query copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     }
   }, [code]);
 
-  const highlighted = useMemo(() => highlightCode(code, format), [code, format]);
+  useEffect(() => {
+    let isMounted = true;
+    async function highlight() {
+      try {
+        const lang = format === "mongodb" ? "json" : format;
+        const result = await codeToHtml(code, {
+          lang,
+          theme: "vitesse-dark",
+        });
+        if (isMounted) setHtml(result);
+      } catch {
+        // Fallback if language fails to load
+        if (isMounted) setHtml(`<pre><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`);
+      }
+    }
+    highlight();
+    return () => {
+      isMounted = false;
+    };
+  }, [code, format]);
 
   return (
     <div className="relative group">
@@ -86,82 +96,15 @@ export function CodeBlock({ code, format }: CodeBlockProps) {
       </button>
 
       {/* Code display */}
-      <pre
+      <div
         className={cn(
           "p-4 rounded-lg overflow-x-auto",
-          "bg-[var(--surface)] border border-[var(--border)]",
+          "bg-[#121212] border border-[var(--border)]",
           "font-mono text-sm leading-relaxed",
-          "text-[var(--foreground)]"
+          "[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0"
         )}
-      >
-        <code dangerouslySetInnerHTML={{ __html: highlighted }} />
-      </pre>
+        dangerouslySetInnerHTML={{ __html: html || `<pre><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>` }}
+      />
     </div>
   );
-}
-
-/**
- * Lightweight keyword-based syntax highlighting.
- * Returns HTML string with <span> wrappers for colored tokens.
- */
-function highlightCode(code: string, format: QueryOutputFormat): string {
-  // HTML-escape the code first
-  const escaped = code
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-
-  switch (format) {
-    case "sql":
-      return highlightSQL(escaped);
-    case "mongodb":
-    case "json":
-      return highlightJSON(escaped);
-    case "graphql":
-      return highlightGraphQL(escaped);
-    default:
-      return escaped;
-  }
-}
-
-function highlightSQL(code: string): string {
-  const keywords = SQL_KEYWORDS.join("|");
-  const regex = new RegExp(`(&#39;.*?&#39;|'.*?')|(\\b(?:${keywords})\\b)|(\\b\\d+(?:\\.\\d+)?\\b)`, "gi");
-
-  return code.replace(regex, (match, str, kw, num) => {
-    if (str) return `<span style="color: var(--success);">${str}</span>`;
-    if (kw) return `<span style="color: var(--indigo-400); font-weight: 600;">${kw}</span>`;
-    if (num) return `<span style="color: var(--color-warning);">${num}</span>`;
-    return match;
-  });
-}
-
-function highlightJSON(code: string): string {
-  // 1: MongoDB Operator Key, 2: Regular Key, 3: String Value, 4: Number, 5: Boolean/Null
-  const regex = /(&quot;\$\w+&quot;(?=\s*:))|(&quot;[^&]*?&quot;(?=\s*:))|(&quot;[^&]*?&quot;)|(\b\d+(?:\.\d+)?\b)|\b(true|false|null)\b/gi;
-
-  return code.replace(regex, (match, opKey, regKey, strVal, num, bool) => {
-    if (opKey) return `<span style="color: var(--indigo-400); font-weight: 600;">${opKey}</span>`;
-    if (regKey) return `<span style="color: var(--foreground);">${regKey}</span>`;
-    if (strVal) return `<span style="color: var(--secondary);">${strVal}</span>`;
-    if (num) return `<span style="color: var(--color-warning);">${num}</span>`;
-    if (bool) return `<span style="color: var(--indigo-400);">${bool}</span>`;
-    return match;
-  });
-}
-
-function highlightGraphQL(code: string): string {
-  const keywords = GRAPHQL_KEYWORDS.join("|");
-  // 1: String, 2: Keyword, 3: Hasura operator, 4: Number
-  const regex = new RegExp(`(&quot;[^&]*?&quot;)|(\\b(?:${keywords})\\b)|(\\b_\\w+\\b)|(\\b\\d+(?:\\.\\d+)?\\b)`, "gi");
-
-  return code.replace(regex, (match, str, kw, op, num) => {
-    if (str) return `<span style="color: var(--success);">${str}</span>`;
-    if (kw) return `<span style="color: var(--indigo-400); font-weight: 600;">${kw}</span>`;
-    if (op) return `<span style="color: var(--color-warning);">${op}</span>`;
-    if (num) return `<span style="color: var(--color-warning);">${num}</span>`;
-    return match;
-  });
 }

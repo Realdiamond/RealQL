@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Database, Zap, Shield, ArrowRight, Code2, Layers, GitMerge } from "lucide-react";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 export default function LandingPage() {
   return (
@@ -36,6 +37,7 @@ export default function LandingPage() {
             >
               Open Studio
             </Link>
+            <ThemeToggle />
           </div>
         </div>
       </nav>
@@ -60,7 +62,7 @@ export default function LandingPage() {
 
           <h1 className="font-heading text-6xl font-extrabold tracking-tight text-foreground sm:text-8xl">
             Query generation, <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-secondary to-tertiary">
+            <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary-hover to-accent-600 dark:to-accent-300">
               perfected.
             </span>
           </h1>
@@ -99,7 +101,7 @@ export default function LandingPage() {
           {/* Glow behind mockup */}
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-b from-primary/50 to-primary/10 opacity-50 blur-2xl" />
           
-          <div className="relative rounded-2xl border border-border/50 bg-[#0a0a0a] shadow-2xl overflow-hidden ring-1 ring-white/10">
+          <div className="relative rounded-2xl border border-border/50 bg-white dark:bg-[#0a0a0a] shadow-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
             {/* Mac Window Header */}
             <div className="flex items-center gap-2 border-b border-border-subtle bg-surface px-4 py-3">
               <div className="flex gap-1.5">
@@ -116,7 +118,7 @@ export default function LandingPage() {
             {/* Window Content (Code Mockup) */}
             <div className="grid grid-cols-1 text-left sm:grid-cols-12 min-h-[300px]">
               {/* Fake Sidebar */}
-              <div className="hidden border-r border-border-subtle bg-[#0a0a0a] p-4 sm:block sm:col-span-3">
+              <div className="hidden border-r border-border-subtle bg-surface p-4 sm:block sm:col-span-3">
                 <div className="space-y-3">
                   <div className="h-2 w-16 rounded bg-surface-elevated" />
                   <div className="h-2 w-24 rounded bg-primary/20" />

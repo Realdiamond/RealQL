@@ -20,14 +20,10 @@ export function useKeyboardShortcuts() {
 
       // Detect modifier key (Cmd on Mac, Ctrl on Windows)
       const isMod = e.metaKey || e.ctrlKey;
-
-      if (!isMod) return;
-
-      // Handle specific combos
       const key = e.key.toLowerCase();
 
       // mod+enter: Execute query (allowed even in inputs)
-      if (key === "enter") {
+      if (isMod && key === "enter") {
         e.preventDefault();
         window.dispatchEvent(new CustomEvent("execute-query"));
         return;
@@ -36,22 +32,24 @@ export function useKeyboardShortcuts() {
       // If we are in an input, don't trigger other shortcuts
       if (isInput) return;
 
-      switch (key) {
-        case "z":
+      // Handle Mod shortcuts
+      if (isMod) {
+        if (key === "z") {
           e.preventDefault();
           if (e.shiftKey) {
             useQueryStore.getState().redo();
           } else {
             useQueryStore.getState().undo();
           }
-          break;
-
-        case "s": {
+        } else if (key === "s") {
           e.preventDefault();
           useUIStore.getState().setSavePresetDialogOpen(true);
-          break;
         }
+        return;
+      }
 
+      // Handle Single-key shortcuts (no modifiers)
+      switch (key) {
         case "e":
           e.preventDefault();
           useUIStore.getState().cyclePreviewFormat();
@@ -64,7 +62,8 @@ export function useKeyboardShortcuts() {
           break;
         }
 
-        case "/": {
+        case "/":
+        case "?": {
           e.preventDefault();
           const uiStore = useUIStore.getState();
           uiStore.setShortcutsDialogOpen(!uiStore.shortcutsDialogOpen);
@@ -79,11 +78,9 @@ export function useKeyboardShortcuts() {
         }
 
         case "r": {
-          if (e.metaKey || e.ctrlKey) {
-            e.preventDefault();
-            const queryStoreR = useQueryStore.getState();
-            queryStoreR.addRule(queryStoreR.rootGroup.id);
-          }
+          e.preventDefault();
+          const queryStoreR = useQueryStore.getState();
+          queryStoreR.addRule(queryStoreR.rootGroup.id);
           break;
         }
       }

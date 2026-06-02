@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Clock, Bookmark, Trash2, Play } from "lucide-react";
-import { ImportExportActions } from "./ImportExportActions";
+import { X, Clock, Bookmark, Trash2, Play, Download } from "lucide-react";
+import { exportJSON } from "@/lib/utils/export-utils";
 import { useUIStore } from "@/lib/store/ui-store";
 import { useQueryHistoryStore, type SavedQuery } from "@/lib/store/query-history-store";
 import { useQueryStore } from "@/lib/store/query-store";
@@ -96,6 +96,10 @@ export function HistorySidebar() {
   function handleLoad(query: SavedQuery) {
     loadQuery(query.rootGroup);
     setOpen(false);
+  }
+
+  function handleExportHistoryLog() {
+    exportJSON(history, `realql-history-log-${Date.now()}.json`);
   }
 
   function formatTime(ts: number) {
@@ -330,8 +334,18 @@ export function HistorySidebar() {
                 </div>
               )}
             </div>
-            {/* Import/Export footer */}
-            <ImportExportActions />
+            
+            {/* Export History Log footer */}
+            <div className="p-4 border-t border-[var(--border)] bg-[var(--surface-secondary)]">
+              <button
+                onClick={handleExportHistoryLog}
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-[var(--surface)] border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--surface-tertiary)] hover:border-[var(--gray-300)] transition-colors"
+                title="Download your entire execution history as a JSON file"
+              >
+                <Download className="h-4 w-4" />
+                Export History Log
+              </button>
+            </div>
           </motion.div>
         </>
       )}

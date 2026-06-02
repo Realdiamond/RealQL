@@ -49,8 +49,8 @@ export function validateQuery(
     });
   }
 
-  // Rule 6: Empty group
-  if (root.children.length === 0) {
+  // Rule 6: Empty group (root group allowed to be empty)
+  if (root.children.length === 0 && depth > 0) {
     errors.push({
       nodeId: root.id,
       field: "children",

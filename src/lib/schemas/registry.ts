@@ -9,19 +9,25 @@ import type { DataSchema } from "@/lib/types";
 import { usersSchema, usersData } from "./users.schema";
 import { productsSchema, productsData } from "./products.schema";
 import { ordersSchema, ordersData } from "./orders.schema";
+import { issuesSchema, issuesData } from "./issues.schema";
+import { serverLogsSchema, serverLogsData } from "./server-logs.schema";
 
 export const SCHEMAS: DataSchema[] = [
   usersSchema,
   productsSchema,
   ordersSchema,
+  issuesSchema,
+  serverLogsSchema,
 ];
 
-export type SchemaId = "users" | "products" | "orders";
+export type SchemaId = "users" | "products" | "orders" | "issues" | "server_logs";
 
 export const SCHEMA_DATA: Record<SchemaId, Record<string, unknown>[]> = {
   users: usersData,
   products: productsData,
   orders: ordersData,
+  issues: issuesData,
+  server_logs: serverLogsData,
 };
 
 /**

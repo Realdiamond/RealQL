@@ -25,7 +25,7 @@ export function ResultsPagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between px-4 py-2.5 border-t border-[var(--border)]">
+    <div className="flex items-center justify-between px-4 py-2.5 border-t border-[var(--border)] bg-[var(--surface-secondary)] relative z-10">
       <p className="text-xs text-[var(--gray-500)]">
         Page {page} of {totalPages}
       </p>
