@@ -2,7 +2,7 @@
 
 A production-grade visual query construction studio that lets you craft complex, nested database queries through an intuitive graphical interface. Built with recursive UI engineering, real-time multi-format preview, and schema-driven rendering.
 
-**Live Demo:** [realql.vercel.app](https://realql.vercel.app)
+**Live Demo:** [real-ql.vercel.app](https://real-ql.vercel.app/)
 
 ---
 
@@ -236,6 +236,34 @@ A single source of truth for the entire color system. Changing the accent color 
 
 ### Why pure-function engine layer?
 Every generator and the executor are pure functions with zero side effects. This makes them trivially testable (no mocking needed), reusable outside React, and safe to run in any context.
+
+---
+
+## ⚡ Performance Optimization Techniques
+
+To ensure the application remains highly responsive even with hundreds of nested rules, several performance optimization strategies were implemented:
+
+1. **Zustand `useShallow` Hook**: Components subscribe only to the precise slices of state they need (e.g., `ExportDropdown` only extracts `rootGroup` and `activeSchemaId`). This prevents the entire UI from re-rendering when unrelated state changes.
+2. **Memoized Handlers**: Every action passed down the recursive component tree uses `useCallback` to maintain reference equality, preventing unnecessary cascading renders in deep branches.
+3. **Pure Generator Functions**: The query evaluation engine (`query-executor.ts`) relies on pure functional recursion without mutating the dataset, allowing React to efficiently track state changes.
+4. **Stable IDs**: Every rule and group is generated with a unique, stable UUID. This guarantees React's reconciliation engine accurately diffs the DOM without destroying and recreating inputs unnecessarily during drag-and-drop operations.
+5. **Debounced Text Inputs**: String fields (like `contains` or `regex`) utilize a debounced input hook to prevent the global store from updating 60 times a second while a user is actively typing.
+
+---
+
+## ⚖️ Trade-offs Made
+
+Building a complex system always requires compromises. Here are the key trade-offs made during development:
+
+1. **Client-Side Execution vs. Server-Side Execution**: 
+   *Trade-off*: We process the live results filtering (`query-executor.ts`) entirely in the browser memory rather than offloading to an API endpoint.
+   *Reason*: For a query builder demo, instant feedback is paramount. It avoids network latency and allows for seamless offline capability. However, it means the mock dataset size is bounded by browser memory (we capped it at 1,500 rows for server logs).
+2. **Immutable Tree Updates vs. Mutable Proxies (e.g., Immer)**: 
+   *Trade-off*: We wrote raw pure functions in `tree-utils.ts` to clone and update the tree instead of using a library like Immer.
+   *Reason*: While Immer reduces boilerplate, manually controlling the cloning logic allowed us to heavily optimize the recursive traversal path and keep the bundle size minimal.
+3. **CSS Custom Properties vs. Pure Tailwind Utilities**:
+   *Trade-off*: We abstracted deeply nested color tokens into CSS custom properties (`var(--surface)`) rather than using pure Tailwind utility classes (`bg-slate-100 dark:bg-slate-900`) everywhere.
+   *Reason*: It greatly simplified the recursive nesting styles (dynamic border colors based on depth) and made the dark mode transition logic significantly cleaner, at the minor cost of having to maintain a `globals.css` file.
 
 ---
 

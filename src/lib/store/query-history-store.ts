@@ -7,16 +7,17 @@ export interface SavedQuery {
   id: string;
   name?: string;
   timestamp: number;
+  activeSchemaId?: string;
   rootGroup: QueryGroup;
 }
 
 interface QueryHistoryState {
   history: SavedQuery[];
   presets: SavedQuery[];
-  addHistory: (rootGroup: QueryGroup) => void;
+  addHistory: (rootGroup: QueryGroup, activeSchemaId: string) => void;
   clearHistory: () => void;
   deleteHistoryItem: (id: string) => void;
-  savePreset: (name: string, rootGroup: QueryGroup) => void;
+  savePreset: (name: string, rootGroup: QueryGroup, activeSchemaId: string) => void;
   deletePreset: (id: string) => void;
 }
 
@@ -28,11 +29,12 @@ export const useQueryHistoryStore = create<QueryHistoryState>()(
       history: [],
       presets: [],
 
-      addHistory: (rootGroup) =>
+      addHistory: (rootGroup, activeSchemaId) =>
         set((state) => {
           const newItem: SavedQuery = {
             id: uuidv4(),
             timestamp: Date.now(),
+            activeSchemaId,
             rootGroup: structuredClone(rootGroup),
           };
           const newHistory = [newItem, ...state.history].slice(0, MAX_HISTORY_ITEMS);
@@ -46,13 +48,14 @@ export const useQueryHistoryStore = create<QueryHistoryState>()(
           history: state.history.filter((item) => item.id !== id),
         })),
 
-      savePreset: (name, rootGroup) =>
+      savePreset: (name, rootGroup, activeSchemaId) =>
         set((state) => {
           const existingIdx = state.presets.findIndex(p => p.name === name);
           const newItem: SavedQuery = {
             id: existingIdx >= 0 ? state.presets[existingIdx].id : uuidv4(),
             name,
             timestamp: Date.now(),
+            activeSchemaId,
             rootGroup: structuredClone(rootGroup),
           };
           

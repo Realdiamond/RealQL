@@ -12,8 +12,9 @@ import { useQueryStore } from "@/lib/store/query-store";
 import { QueryGroup } from "./QueryGroup";
 import { SCHEMAS, type SchemaId, getSchema } from "@/lib/schemas/registry";
 import { cn } from "@/lib/utils/cn";
-import { Database, RotateCcw, Undo2, Redo2 } from "lucide-react";
+import { Database, RotateCcw, Undo2, Redo2, Bookmark } from "lucide-react";
 import { useQueryValidation } from "@/hooks/use-query-validation";
+import { useUIStore } from "@/lib/store/ui-store";
 import { useState, useCallback, useEffect } from "react";
 import {
   DndContext,
@@ -36,6 +37,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export function QueryBuilder() {
   const {
@@ -49,6 +58,7 @@ export function QueryBuilder() {
     redoStack,
     moveNode,
   } = useQueryStore();
+  const setSavePresetDialogOpen = useUIStore((state) => state.setSavePresetDialogOpen);
 
   // Resolve active schema fields for validation
   const schema = getSchema(activeSchemaId);
@@ -58,6 +68,34 @@ export function QueryBuilder() {
   const validationErrors = useQueryValidation(rootGroup, fields);
 
   const [activeNode, setActiveNode] = useState<QueryNode | null>(null);
+  const [pendingSchema, setPendingSchema] = useState<SchemaId | null>(null);
+
+  const handleSchemaSelect = useCallback((val: string | null) => {
+    if (!val) return;
+    const newSchema = val as SchemaId;
+    if (newSchema === activeSchemaId || !SCHEMAS.some((s) => s.id === newSchema)) return;
+
+    const firstChild = rootGroup.children[0];
+    const isBasicallyEmpty = 
+      rootGroup.children.length === 0 || 
+      (rootGroup.children.length === 1 && 
+       firstChild.type === "rule" && 
+       !firstChild.field && 
+       !firstChild.value);
+
+    if (isBasicallyEmpty) {
+      setSchema(newSchema);
+    } else {
+      setPendingSchema(newSchema);
+    }
+  }, [activeSchemaId, rootGroup.children, setSchema]);
+
+  const confirmSchemaChange = useCallback(() => {
+    if (pendingSchema) {
+      setSchema(pendingSchema);
+      setPendingSchema(null);
+    }
+  }, [pendingSchema, setSchema]);
   const [isMounted, setIsMounted] = useState(false);
 
   // Prevent hydration mismatch for UUIDs generated on the server vs client
@@ -139,11 +177,7 @@ export function QueryBuilder() {
           </div>
           <Select
             value={activeSchemaId}
-            onValueChange={(val) => {
-              if (SCHEMAS.some((s) => s.id === val)) {
-                setSchema(val as SchemaId);
-              }
-            }}
+            onValueChange={handleSchemaSelect}
           >
             <SelectTrigger
               className={cn(
@@ -212,6 +246,23 @@ export function QueryBuilder() {
 
           <button
             type="button"
+            onClick={() => setSavePresetDialogOpen(true)}
+            className={cn(
+              "inline-flex items-center gap-1.5",
+              "px-2.5 py-1.5 rounded-md text-xs font-medium",
+              "text-[var(--gray-500)] hover:text-[var(--foreground)]",
+              "hover:bg-[var(--surface-secondary)]",
+              "transition-colors duration-150"
+            )}
+            aria-label="Save Preset"
+            title="Save Preset (⌘S)"
+          >
+            <Bookmark className="h-3.5 w-3.5" />
+            <span>Save</span>
+          </button>
+
+          <button
+            type="button"
             onClick={resetQuery}
             className={cn(
               "inline-flex items-center gap-1.5",
@@ -241,6 +292,31 @@ export function QueryBuilder() {
           <QueryDragOverlay activeNode={activeNode} />
         </DndContext>
       </div>
+
+      <Dialog open={!!pendingSchema} onOpenChange={(open) => !open && setPendingSchema(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Data Source?</DialogTitle>
+            <DialogDescription>
+              Changing the data source will clear your current query because the fields are incompatible. Are you sure you want to proceed?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <button
+              onClick={() => setPendingSchema(null)}
+              className="rounded-md px-4 py-2 text-sm font-medium text-[var(--gray-500)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmSchemaChange}
+              className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-600 transition-colors"
+            >
+              Clear Query & Switch
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

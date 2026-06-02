@@ -78,7 +78,7 @@ export function QueryResultsPanel() {
       const executionResult = executeQuery(rootGroup, dataset);
 
       setLatestResult(executionResult);
-      addHistory(rootGroup);
+      addHistory(rootGroup, activeSchemaId);
       setIsLoading(false);
       
       toast.success(`Executed query returning ${executionResult.matchedCount} results`);
@@ -135,6 +135,16 @@ export function QueryResultsPanel() {
         onPageSizeChange={handlePageSizeChange}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        onExportCSV={
+          latestResult?.data && latestResult.matchedCount > 0
+            ? () => {
+                import("@/lib/utils/export-utils").then(({ exportCSV }) => {
+                  exportCSV(latestResult.data, `realql-results-${Date.now()}.csv`);
+                  toast.success("Results exported as CSV");
+                });
+              }
+            : undefined
+        }
       />
 
       {/* Content area */}

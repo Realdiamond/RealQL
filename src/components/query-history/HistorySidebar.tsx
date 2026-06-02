@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock, Bookmark, Trash2, Play, Download } from "lucide-react";
 import { exportJSON } from "@/lib/utils/export-utils";
@@ -9,17 +9,30 @@ import { useQueryHistoryStore, type SavedQuery } from "@/lib/store/query-history
 import { useQueryStore } from "@/lib/store/query-store";
 import { cn } from "@/lib/utils/cn";
 import type { QueryGroup } from "@/lib/types";
+import type { SchemaId } from "@/lib/schemas/registry";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export function HistorySidebar() {
   const open = useUIStore((state) => state.historySidebarOpen);
   const setOpen = useUIStore((state) => state.setHistorySidebarOpen);
+  const setSavePresetDialogOpen = useUIStore((state) => state.setSavePresetDialogOpen);
   
   const history = useQueryHistoryStore((state) => state.history);
   const presets = useQueryHistoryStore((state) => state.presets);
   const deletePreset = useQueryHistoryStore((state) => state.deletePreset);
   const clearHistory = useQueryHistoryStore((state) => state.clearHistory);
   
-  const loadQuery = useQueryStore((state) => state.loadQuery);
+  const { loadQuery, setSchema, rootGroup } = useQueryStore();
+
+  const [clearHistoryModalOpen, setClearHistoryModalOpen] = useState(false);
+  const [pendingLoadItem, setPendingLoadItem] = useState<SavedQuery | null>(null);
 
   const activeTab = useUIStore((state) => state.activeHistoryTab || "history");
   const setActiveTab = useUIStore((state) => state.setActiveHistoryTab);
@@ -93,13 +106,35 @@ export function HistorySidebar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, setOpen]);
 
-  function handleLoad(query: SavedQuery) {
+  function executeLoad(query: SavedQuery) {
+    if (query.activeSchemaId) {
+      setSchema(query.activeSchemaId as SchemaId);
+    }
     loadQuery(query.rootGroup);
     setOpen(false);
+    setPendingLoadItem(null);
+  }
+
+  function handleLoad(query: SavedQuery) {
+    if (rootGroup.children.length > 0) {
+      setPendingLoadItem(query);
+    } else {
+      executeLoad(query);
+    }
   }
 
   function handleExportHistoryLog() {
     exportJSON(history, `realql-history-log-${Date.now()}.json`);
+  }
+
+  function handleExportHistoryItem(item: SavedQuery) {
+    const payload = {
+      version: "1.0",
+      timestamp: new Date(item.timestamp).toISOString(),
+      schemaId: item.activeSchemaId,
+      rootGroup: item.rootGroup,
+    };
+    exportJSON(payload, `realql-preset-${item.timestamp}.json`);
   }
 
   function formatTime(ts: number) {
@@ -146,8 +181,9 @@ export function HistorySidebar() {
   }
 
   return (
-    <AnimatePresence>
-      {open && (
+    <>
+      <AnimatePresence>
+        {open && (
         <>
           {/* Backdrop */}
           <motion.div
@@ -244,7 +280,7 @@ export function HistorySidebar() {
                           Recent Executions
                         </span>
                         <button
-                          onClick={clearHistory}
+                          onClick={() => setClearHistoryModalOpen(true)}
                           className="text-[10px] font-medium text-[var(--gray-500)] hover:text-[var(--danger)]"
                         >
                           Clear All
@@ -267,12 +303,36 @@ export function HistorySidebar() {
                             <span className="text-[10px] text-[var(--gray-500)]">
                               {formatDate(item.timestamp)}
                             </span>
-                            <button
-                              onClick={() => handleLoad(item)}
-                              className="opacity-0 group-hover:opacity-100 flex items-center gap-1 rounded px-2 py-1 text-[10px] font-medium bg-[var(--accent-100)] text-[var(--accent-700)] dark:bg-[var(--accent-900)]/40 dark:text-[var(--accent-300)] hover:bg-[var(--accent-200)] transition-colors"
-                            >
-                              <Play size={10} /> Load Query
-                            </button>
+                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSavePresetDialogOpen(true, item.rootGroup, item.activeSchemaId);
+                                }}
+                                className="flex items-center gap-1 rounded px-2 py-1 text-[10px] font-medium bg-[var(--surface)] border border-[var(--border)] text-[var(--gray-600)] hover:bg-[var(--surface-tertiary)] transition-colors"
+                                title="Save to Presets"
+                                aria-label="Save to Presets"
+                              >
+                                <Bookmark size={10} />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleExportHistoryItem(item);
+                                }}
+                                className="flex items-center gap-1 rounded px-2 py-1 text-[10px] font-medium bg-[var(--surface)] border border-[var(--border)] text-[var(--gray-600)] hover:bg-[var(--surface-tertiary)] transition-colors"
+                                title="Export as Preset"
+                                aria-label="Export as Preset"
+                              >
+                                <Download size={10} />
+                              </button>
+                              <button
+                                onClick={() => handleLoad(item)}
+                                className="flex items-center gap-1 rounded px-2 py-1 text-[10px] font-medium bg-[var(--accent-100)] text-[var(--accent-700)] dark:bg-[var(--accent-900)]/40 dark:text-[var(--accent-300)] hover:bg-[var(--accent-200)] transition-colors"
+                              >
+                                <Play size={10} /> Load Query
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -350,5 +410,61 @@ export function HistorySidebar() {
         </>
       )}
     </AnimatePresence>
+
+      <Dialog open={clearHistoryModalOpen} onOpenChange={setClearHistoryModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Clear History?</DialogTitle>
+            <DialogDescription>
+              This will permanently delete your entire execution history. Your saved presets will not be affected. Are you sure?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <button
+              onClick={() => setClearHistoryModalOpen(false)}
+              className="rounded-md px-4 py-2 text-sm font-medium text-[var(--gray-500)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                clearHistory();
+                setClearHistoryModalOpen(false);
+              }}
+              className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-600 transition-colors"
+            >
+              Clear History
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!pendingLoadItem} onOpenChange={(open) => !open && setPendingLoadItem(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Overwrite Current Query?</DialogTitle>
+            <DialogDescription>
+              Loading this preset will replace your current query and clear all unsaved changes. Are you sure you want to proceed?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <button
+              onClick={() => setPendingLoadItem(null)}
+              className="rounded-md px-4 py-2 text-sm font-medium text-[var(--gray-500)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                if (pendingLoadItem) executeLoad(pendingLoadItem);
+              }}
+              className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-600 transition-colors"
+            >
+              Overwrite
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

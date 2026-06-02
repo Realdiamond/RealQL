@@ -102,7 +102,7 @@ const categories = [
 ] as const;
 
 export const productsData: Record<string, unknown>[] = Array.from(
-  { length: 120 },
+  { length: 500 },
   (_, i) => {
     const category = pick(categories);
     const noun = pick(nouns[category]);

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Download, Code, Database, FileJson, ChevronDown } from "lucide-react";
+import { Download, Code, FileJson, ChevronDown } from "lucide-react";
 import { useQueryStore } from "@/lib/store/query-store";
-import { exportJSON, exportText, exportCSV } from "@/lib/utils/export-utils";
+import { exportJSON, exportText } from "@/lib/utils/export-utils";
 import { generateQuery } from "@/lib/engine/query-generator";
 import { getSchema } from "@/lib/schemas/registry";
 import type { SchemaId } from "@/lib/schemas/registry";
@@ -14,11 +14,10 @@ export function ExportDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { rootGroup, activeSchemaId, latestResult } = useQueryStore(
+  const { rootGroup, activeSchemaId } = useQueryStore(
     useShallow((state) => ({
       rootGroup: state.rootGroup,
       activeSchemaId: state.activeSchemaId,
-      latestResult: state.latestResult,
     }))
   );
 
@@ -59,15 +58,6 @@ export function ExportDropdown() {
     toast.success("SQL code exported successfully");
   };
 
-  const handleExportResults = () => {
-    if (!latestResult || latestResult.matchedCount === 0 || !latestResult.data) {
-      toast.error("No results to export. Execute the query first.");
-      return;
-    }
-    exportCSV(latestResult.data, `realql-results-${Date.now()}.csv`);
-    setIsOpen(false);
-    toast.success("Results exported as CSV");
-  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -98,14 +88,6 @@ export function ExportDropdown() {
           >
             <Code className="h-3.5 w-3.5 text-green-500" />
             <span>SQL Query (.sql)</span>
-          </button>
-          <button
-            onClick={handleExportResults}
-            disabled={!latestResult || latestResult.matchedCount === 0}
-            className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-[var(--foreground)] hover:bg-[var(--surface-secondary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Database className="h-3.5 w-3.5 text-purple-500" />
-            <span>Query Results (.csv)</span>
           </button>
         </div>
       )}

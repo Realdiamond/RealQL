@@ -6,7 +6,7 @@
  */
 
 import { create } from "zustand";
-import type { QueryOutputFormat } from "@/lib/types";
+import type { QueryOutputFormat, QueryGroup } from "@/lib/types";
 
 export type AllowedHistoryTab = "history" | "presets";
 
@@ -17,6 +17,8 @@ interface UIState {
   historySidebarOpen: boolean;
   activeHistoryTab?: AllowedHistoryTab;
   savePresetDialogOpen: boolean;
+  savePresetTargetGroup?: QueryGroup | null;
+  savePresetTargetSchemaId?: string | null;
 
   // Actions
   toggleSidebar: () => void;
@@ -26,7 +28,7 @@ interface UIState {
   setShortcutsDialogOpen: (open: boolean) => void;
   setHistorySidebarOpen: (open: boolean) => void;
   setActiveHistoryTab: (tab: AllowedHistoryTab) => void;
-  setSavePresetDialogOpen: (open: boolean) => void;
+  setSavePresetDialogOpen: (open: boolean, group?: QueryGroup | null, schemaId?: string | null) => void;
 }
 
 const FORMAT_CYCLE: QueryOutputFormat[] = ["sql", "mongodb", "graphql", "json"];
@@ -37,6 +39,8 @@ export const useUIStore = create<UIState>((set) => ({
   shortcutsDialogOpen: false,
   historySidebarOpen: false,
   savePresetDialogOpen: false,
+  savePresetTargetGroup: null,
+  savePresetTargetSchemaId: null,
   activeHistoryTab: "history",
 
   toggleSidebar: () => {
@@ -71,7 +75,11 @@ export const useUIStore = create<UIState>((set) => ({
     set({ activeHistoryTab: tab });
   },
 
-  setSavePresetDialogOpen: (open) => {
-    set({ savePresetDialogOpen: open });
+  setSavePresetDialogOpen: (open, group, schemaId) => {
+    set({ 
+      savePresetDialogOpen: open, 
+      savePresetTargetGroup: group || null,
+      savePresetTargetSchemaId: schemaId || null
+    });
   },
 }));
