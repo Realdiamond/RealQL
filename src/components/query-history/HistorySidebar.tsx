@@ -137,10 +137,6 @@ export function HistorySidebar() {
     exportJSON(payload, `realql-preset-${item.timestamp}.json`);
   }
 
-  function handleExportHistoryLog() {
-    exportJSON(history, `realql-history-log-${Date.now()}.json`);
-  }
-
   function formatTime(ts: number) {
     return new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
