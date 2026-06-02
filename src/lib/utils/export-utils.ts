@@ -71,6 +71,6 @@ export function exportCSV(data: Record<string, unknown>[], filename: string) {
     csvRows.push(values.join(","));
   }
 
-  const csvContent = csvRows.join("\\n");
+  const csvContent = csvRows.join("\n");
   downloadFile(csvContent, filename, "text/csv");
 }

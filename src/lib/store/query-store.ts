@@ -12,6 +12,7 @@
  */
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { QueryGroup, QueryRule, ExecutionResult } from "@/lib/types";
 import type { SchemaId } from "@/lib/schemas/registry";
 import { generateId } from "@/lib/utils/id";
@@ -97,7 +98,9 @@ function pushUndo(state: QueryState): { undoStack: HistorySnapshot[]; redoStack:
   return { undoStack: newStack, redoStack: [] };
 }
 
-export const useQueryStore = create<QueryState>((set, get) => ({
+export const useQueryStore = create<QueryState>()(
+  persist(
+    (set, get) => ({
   rootGroup: createEmptyRoot(),
   activeSchemaId: "users",
   undoStack: [],
@@ -298,7 +301,16 @@ export const useQueryStore = create<QueryState>((set, get) => ({
       };
     });
   },
-}));
+    }),
+    {
+      name: "realql-storage",
+      partialize: (state) => ({
+        rootGroup: state.rootGroup,
+        activeSchemaId: state.activeSchemaId,
+      }),
+    }
+  )
+);
 
 /** Helper: extract map of groupId -> collapsed from a tree */
 function getCollapseMap(

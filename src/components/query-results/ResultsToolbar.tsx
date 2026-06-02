@@ -7,7 +7,7 @@
 
 "use client";
 
-import { Play, Loader2, Clock, Database } from "lucide-react";
+import { Play, Loader2, Clock, Database, Download } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 interface ResultsToolbarProps {
@@ -20,6 +20,7 @@ interface ResultsToolbarProps {
   onPageSizeChange: (size: number) => void;
   viewMode: "table" | "cards";
   onViewModeChange: (mode: "table" | "cards") => void;
+  onExportCSV?: () => void;
 }
 
 const PAGE_SIZES = [10, 25, 50, 100];
@@ -34,6 +35,7 @@ export function ResultsToolbar({
   onPageSizeChange,
   viewMode,
   onViewModeChange,
+  onExportCSV,
 }: ResultsToolbarProps) {
   const hasResults = matchedCount !== null;
 
@@ -117,6 +119,17 @@ export function ResultsToolbar({
           </div>
 
           <div className="flex items-center gap-2">
+            {onExportCSV && (
+              <button
+                type="button"
+                onClick={onExportCSV}
+                className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] text-[var(--foreground)] hover:bg-[var(--surface-tertiary)] transition-colors mr-2"
+                aria-label="Export CSV"
+              >
+                <Download size={14} className="text-purple-500" />
+                Export CSV
+              </button>
+            )}
             <label
               htmlFor="page-size-select"
               className="text-xs text-[var(--gray-500)]"

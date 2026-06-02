@@ -108,7 +108,7 @@ function seededDate(start: Date, end: Date): string {
 }
 
 export const usersData: Record<string, unknown>[] = Array.from(
-  { length: 150 },
+  { length: 500 },
   (_, i) => ({
     id: i + 1,
     name: `${seededEl(firstNames)} ${seededEl(lastNames)}`,

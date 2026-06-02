@@ -102,7 +102,7 @@ const statuses = [
 ] as const;
 
 export const ordersData: Record<string, unknown>[] = Array.from(
-  { length: 100 },
+  { length: 500 },
   (_, i) => {
     const status = pick(statuses);
     const isPaid =

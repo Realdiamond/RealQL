@@ -16,14 +16,17 @@ import { useShallow } from "zustand/react/shallow";
 import { cn } from "@/lib/utils/cn";
 
 export function SavePresetDialog() {
-  const { open, setOpen } = useUIStore(
+  const { open, setOpen, targetGroup, targetSchemaId } = useUIStore(
     useShallow((state) => ({
       open: state.savePresetDialogOpen,
       setOpen: state.setSavePresetDialogOpen,
+      targetGroup: state.savePresetTargetGroup,
+      targetSchemaId: state.savePresetTargetSchemaId,
     }))
   );
 
   const rootGroup = useQueryStore((state) => state.rootGroup);
+  const activeSchemaId = useQueryStore((state) => state.activeSchemaId);
   const savePreset = useQueryHistoryStore((state) => state.savePreset);
   
   const [name, setName] = React.useState("");
@@ -40,12 +43,14 @@ export function SavePresetDialog() {
     e.preventDefault();
     if (!name.trim()) return;
     
-    savePreset(name.trim(), rootGroup);
+    const rootGroupToSave = targetGroup || rootGroup;
+    const schemaIdToSave = targetSchemaId || activeSchemaId;
+    savePreset(name.trim(), rootGroupToSave, schemaIdToSave);
     setOpen(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Save as Preset</DialogTitle>
